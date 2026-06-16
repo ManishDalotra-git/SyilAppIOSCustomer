@@ -14,7 +14,6 @@ import {
   ImageBackground,
 } from 'react-native';
 
-// ✅ JSON import
 import articlesData from '../../assets/articles.json';
 import { useRoute } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -80,58 +79,6 @@ const KnowledgeBase = ({ navigation }) => {
   );
 
 
-
-  // ✅ Load data from JSON instead of CSV
-  // useEffect(() => {
-  //   const cleanData = articlesData.filter(
-  //     item => item['Article title'] && item['Article body']
-  //   );
-
-  //   setArticles(cleanData);
-  //   setLoading(false);
-  // }, []);
-
-
-
-
-  
-// useEffect(() => {
-//   const loadArticles = async () => {
-//     try {
-//       const filePath = `${RNFS.DocumentDirectoryPath}/articles.json`;
-
-//       // Check if file exists
-//       const exists = await RNFS.exists(filePath);
-//       let rawData = null;
-
-//       if (exists) {
-//         const content = await RNFS.readFile(filePath, 'utf8');
-//         rawData = JSON.parse(content);
-//       } else {
-//         // fallback to bundled JSON import
-//         rawData = articlesData;
-//       }
-
-//       const cleanData = rawData.filter(
-//         item => item['Article title'] && item['Article body']
-//       );
-
-//       setArticles(cleanData);
-//       setLoading(false);
-//     } catch (error) {
-//       console.error('Failed to load articles:', error);
-//       // fallback to bundled JSON import on error
-//       const cleanData = articlesData.filter(
-//         item => item['Article title'] && item['Article body']
-//       );
-//       setArticles(cleanData);
-//       setLoading(false);
-//     }
-//   };
-
-//   loadArticles();
-// }, []);
-
 useEffect(() => {
   const fetchArticles = async () => {
     try {
@@ -139,10 +86,6 @@ useEffect(() => {
         'https://syilapp-w8ye.onrender.com/articles'
       );
       const data = await response.json();
-
-      // const cleanData = data.filter(
-      //   item => item['Article title'] && item['Article body']
-      // );
 
       const cleanData = data
   .filter(item => item['Article title'] && item['Article body'])
@@ -155,10 +98,6 @@ useEffect(() => {
     } catch (err) {
       console.log('Fetch error:', err);
 
-      // fallback (offline safety)
-      // const cleanData = articlesData.filter(
-      //   item => item['Article title'] && item['Article body']
-      // );
       const cleanData = articlesData
   .filter(item => item['Article title'] && item['Article body'])
   .map(item => ({
@@ -180,29 +119,20 @@ useEffect(() => {
   }
 }, [route.params]);
 
-
-  // ✅ Categories (same logic)
-  // const categories = useMemo(() => {
-  //   const unique = [...new Set(articles.map(a => a.Category))];
-  //   return unique;
-  //   //return unique.slice(0, 10);
-  // }, [articles]);
-
     const categories = useMemo(() => {
   const unique = [...new Set(articles.map(a => a.Category))];
 
   return unique
-    .filter(Boolean) // null/undefined remove
+    .filter(Boolean)
     .sort((a, b) => a.localeCompare(b));
 }, [articles]);
 
-const [activeTab, setActiveTab] = useState('all'); // 'all' | 'new'
+const [activeTab, setActiveTab] = useState('all'); 
 
   const hasNewArticles = useMemo(() => {
   return articles.some(item => item.newArticle === true);
 }, [articles]);
 
-  // ✅ Search + Category filter (unchanged)
   const filteredArticles = useMemo(() => {
   const filtered = articles.filter(item => {
     const matchSearch =
@@ -299,15 +229,7 @@ const [activeTab, setActiveTab] = useState('all'); // 'all' | 'new'
           {/* HEADER */}
           <View style={styles.flexClass}>
             <Pressable onPress={() => navigation.navigate('Profile')}>
-              {/* <Image
-                source={require('../../images/right_arrow.png')}
-                style={styles.rightarrowIcon}
-              /> */}
-
-                {/* <Image
-                  source={require('../../images/profile_icon.png')}
-                  style={styles.profileImage}
-                /> */}
+              
                 
                 <View style={styles.initialsAvatar}>
                   <Text allowFontScaling={false} style={styles.initialsText}>
@@ -376,8 +298,6 @@ const [activeTab, setActiveTab] = useState('all'); // 'all' | 'new'
               )}
             />
           </View>
-
-          {/* <Text allowFontScaling={false} style={styles.popularTitle}>Popular Articles</Text> */}
 
           {hasNewArticles && (
   <View style={styles.tabContainer}>

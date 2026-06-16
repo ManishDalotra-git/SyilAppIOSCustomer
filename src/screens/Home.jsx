@@ -26,10 +26,6 @@ const Home = () => {
       const res = await fetch('https://syilappcustomer.onrender.com/articles');
       const data = await res.json();
 
-      // const count = data.filter(item => {
-      //   return String(item.newArticle).toLowerCase() === 'true';
-      // }).length;
-
       const newArticles = data.filter(item =>
         String(item.newArticle).toLowerCase() === 'true'
       );
@@ -107,45 +103,16 @@ useFocusEffect(
     };
 
     init();
-  }, [latestId]) // 👈 important
+  }, [latestId])
 );
 
 
-
-// useEffect(() => { 
-//   const checkBellStatus = async () => {
-
-//     const storedId = await AsyncStorage.getItem('lastSeenArticleId');
-//     const AppSupportTeamMember = await AsyncStorage.getItem('app_support_team_member');
-//     console.log('AppSupportTeamMember:', AppSupportTeamMember);
-    
-
-//     if(AppSupportTeamMember === 'Yes'){
-//       setAppSupportTeamMember(true);
-//       console.log('AppSupportTeamMember---yes:', AppSupportTeamMember);
-//     }
-
-    
-
-//     if (!latestId) return;
-
-//     if (storedId !== latestId) {
-//       setShowBell(true);
-//     } else {
-//       setShowBell(false);
-//     }
-//   };
-
-//   checkBellStatus();
-// }, [latestId]);
 
   return (
     <ImageBackground source={require('../../images/Login_System.png')}  style={styles.background}
       resizeMode="cover">
       <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-      {/* <View>
-        <Image source={require('../../images/syil_logo_white.png')} style={styles.logo} />
-      </View> */}
+      
 
       <View style={styles.headerRow}>
         <Image

@@ -21,24 +21,7 @@ const Loading = ({ navigation }) => {
 
   const progress = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0)).current;
-    // useEffect(() => {
-    // Animated.timing(scaleAnim, {
-    //     toValue: 1,
-    //     duration: 1000,
-    //     useNativeDriver: true,
-    // }).start();
-    // Animated.timing(progress, {
-    //     toValue: width - 60,
-    //     duration: 3500,
-    //     useNativeDriver: false,
-    // }).start();
-    // const timer = setTimeout(() => {
-    //     navigation.replace('Ticket');
-    // }, 4000);
-
-    // return () => clearTimeout(timer);
-    // }, []);
-
+   
 useEffect(() => {
   Animated.timing(scaleAnim, {
         toValue: 1,

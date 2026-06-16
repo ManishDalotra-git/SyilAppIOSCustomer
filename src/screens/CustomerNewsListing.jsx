@@ -149,7 +149,7 @@ const CustomerNewsListing = ({ navigation }) => {
     <KeyboardAvoidingView
                     style={{ flex: 1 }}
                     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                    keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} // adjust if you have headers
+                    keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} 
                   >
     <View style={styles.container}>
 
@@ -231,10 +231,6 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 24, fontWeight: '700', textAlign: 'center', width: '82%' },
 
   containerInner: { paddingHorizontal: 16,},
-
-  // searchContainer: {
-  //   marginBottom: 20,
-  // },
 
   searchBox: {
     flexDirection: 'row',

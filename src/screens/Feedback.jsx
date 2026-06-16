@@ -114,7 +114,7 @@ const Feedback = () => {
       <KeyboardAvoidingView
                     style={{ flex: 1,}}
                     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                    keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} // adjust if you have headers
+                    keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} 
                   >
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -174,7 +174,7 @@ const Feedback = () => {
                     key={item.value}
                     style={{ padding:15, borderBottomWidth:1 }}
                     onPress={() => {
-                      setSubject(item.value); // ✅ SAME VALUE
+                      setSubject(item.value);
                       setErrors({ ...errors, subject: null });
                       setShowSubjectModal(false);
                     }}
@@ -238,7 +238,7 @@ const Feedback = () => {
                     key={item}
                     style={{ padding:15, borderBottomWidth:1 }}
                     onPress={() => {
-                      setRating(item); // ✅ SAME VALUE
+                      setRating(item);
                       setErrors({ ...errors, rating: null });
                       setShowRatingModal(false);
                     }}
@@ -276,7 +276,6 @@ const Feedback = () => {
           <Text allowFontScaling={false} style={styles.loadingText}>Please wait...</Text>
         </View>
       )}
-
 
       
     </KeyboardAvoidingView>

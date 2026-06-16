@@ -41,20 +41,19 @@ const Profile = ({ navigation }) => {
     gender: '',
   });
 
-  // 🔹 Load user
+  // Load user
   useEffect(() => {
     const getUser = async () => {
       const data = await AsyncStorage.getItem('userData');
       if (data) {
         const parsed = JSON.parse(data);
         setUser(parsed);
-        setContactId(parsed.contactId); // 🔒 hidden
+        setContactId(parsed.contactId);
       }
     };
     getUser();
   }, []);
 
-  // 🔹 Fill form
   useEffect(() => {
     if (user) {
       setForm({
@@ -103,12 +102,12 @@ const Profile = ({ navigation }) => {
     return `${f}${l}`;
   };
 
-  // 🔥 SAVE PROFILE (API CALL)
+
   const handleSaveProfile = async () => {
     const contactId = getContactId();
     if (!contactId) return alert('Contact ID missing');
 
-    setLoading(true); // show loading
+    setLoading(true);
 
     try {
       const response = await fetch(
@@ -254,7 +253,6 @@ const Profile = ({ navigation }) => {
               style={styles.input}
               value={firstName}
               onChangeText={(v) => setFirstName(v)}
-              //onChangeText={(v) => setForm({ ...form, firstName: v })}
             />
           </View>
 
@@ -270,7 +268,6 @@ const Profile = ({ navigation }) => {
               style={styles.input}
               value={lastName}
               onChangeText={(v) => setLastName(v)}
-              //onChangeText={(v) => setForm({ ...form, lastName: v })}
             />
           </View>
 
@@ -286,7 +283,6 @@ const Profile = ({ navigation }) => {
               style={styles.input}
               value={bio}
               onChangeText={(v) => setBio(v)}
-              //nChangeText={(v) => setForm({ ...form, bio: v })}
             />
           </View>
 
@@ -302,7 +298,6 @@ const Profile = ({ navigation }) => {
               style={styles.input}
               value={phone}
               onChangeText={(v) => setPhone(v)}
-              //onChangeText={(v) => setForm({ ...form, phone: v })}
             />
           </View>
 
@@ -318,7 +313,6 @@ const Profile = ({ navigation }) => {
               style={styles.input}
               value={gender}
               onChangeText={(v) => setGender(v)}
-              //onChangeText={(v) => setForm({ ...form, gender: v })}
             />
           </View>
 

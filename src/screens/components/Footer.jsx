@@ -4,8 +4,6 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 
 const Footer = ({ appSupportTeamMember, currentRoute }) => {
   const navigation = useNavigation();
-  //const route = useRoute();
-  //const currentRoute = route.name;
 
   return (
     <View style={styles.footer}>

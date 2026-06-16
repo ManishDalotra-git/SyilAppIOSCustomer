@@ -23,7 +23,7 @@ const KnowledgeDetail = ({ route, navigation }) => {
   const customHTMLElementModels = {
     video: HTMLElementModel.fromCustomModel({
       tagName: 'video',
-      contentModel: HTMLContentModel.block, // ⚠️ important
+      contentModel: HTMLContentModel.block,
     }),
   };
 
@@ -59,13 +59,13 @@ const KnowledgeDetail = ({ route, navigation }) => {
           let cells = row.match(/<(td|th)[\s\S]*?<\/\1>/gi) || [];
           let finalCells = [];
 
-          // Inject active rowspan cells first (empty cells)
+          
           activeRowspans.forEach((r) => {
-            finalCells.push('<td></td>'); // empty cell
+            finalCells.push('<td></td>'); 
             r.count--;
           });
 
-          // Remove expired rowspans
+          
           for (let i = activeRowspans.length - 1; i >= 0; i--) {
             if (activeRowspans[i].count <= 0) activeRowspans.splice(i, 1);
           }
@@ -97,14 +97,12 @@ const KnowledgeDetail = ({ route, navigation }) => {
   useEffect(() => {
     let rawHtml = article?.['Article body'] || '';
 
-    // Apply rowspan normalization here
     rawHtml = normalizeRowspanHTML(rawHtml);
 
     rawHtml = rawHtml
       .replace(/<tr>\s*(<td>(&nbsp;|\s)*<\/td>\s*)+<\/tr>/gi, '')
       .replace(/<p>(&nbsp;|\s)*<\/p>/gi, '');
 
-    // Table wrapper for horizontal scroll
     rawHtml = rawHtml.replace(/<table/gi, '<div class="rn-table"><table');
     rawHtml = rawHtml.replace(/<\/table>/gi, '</table></div>');
 
@@ -195,7 +193,7 @@ const KnowledgeDetail = ({ route, navigation }) => {
       div: {
         wrapperComponent: ({ tnode, children }) => {
           if (tnode.attributes.class === 'rn-table') {
-            // ✅ Horizontal ScrollView for tables
+            
             return (
               <ScrollView horizontal showsHorizontalScrollIndicator>
                 <View>{children}</View>

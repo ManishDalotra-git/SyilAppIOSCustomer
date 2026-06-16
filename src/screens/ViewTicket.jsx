@@ -59,37 +59,6 @@ const ViewTicket = ({ navigation }) => {
         }, [])
     );
 
-    // useFocusEffect(
-    //     useCallback(() => {
-    //         const fetchTickets = async () => {
-    //             if (!contactID) return;
-
-    //             try {
-    //                 setLoading(true);
-    //                 const response = await fetch('https://syilapp-w8ye.onrender.com/get_contact_tickets', {
-    //                 method: 'POST',
-    //                 headers: {
-    //                     'Content-Type': 'application/json',
-    //                 },
-    //                 body: JSON.stringify({
-    //                     contactId: contactID,
-    //                 }),
-    //                 });
-
-    //                 const data = await response.json();
-    //                 setTickets(data.tickets || []);
-    //                 setLoading(false);
-    //             } catch (error) {
-    //                 console.log('Ticket fetch error', error);
-    //                 setLoading(false);
-    //             }
-    //         };
-
-    //         fetchTickets();
-    //     }, [contactID])
-    // );
-
-
     useFocusEffect(
         useCallback(() => {
             const fetchTickets = async () => {
@@ -97,9 +66,6 @@ const ViewTicket = ({ navigation }) => {
 
                 try {
                     setLoading(true);
-
-                    //https://syilapp-w8ye.onrender.com/get_contact_tickets
-                    //http://192.168.0.84:3000
 
                     const response = await fetch('https://syilappcustomer.onrender.com/get_tickets', {
                     method: 'POST',
@@ -298,15 +264,7 @@ const ViewTicket = ({ navigation }) => {
             {/* HEADER */}
             <View style={styles.flexClass}>
                 <Pressable onPress={() => navigation.navigate('Profile')}>
-                    {/* <Image
-                    source={require('../../images/right_arrow.png')}
-                    style={styles.rightarrowIcon}
-                    /> */}
-    
-                    {/* <Image
-                        source={require('../../images/profile_icon.png')}
-                        style={styles.profileImage}
-                    /> */}
+                   
                     <View style={styles.initialsAvatar}>
                         <Text allowFontScaling={false} style={styles.initialsText}>
                         {getInitials(firstName, lastName)}
@@ -326,25 +284,6 @@ const ViewTicket = ({ navigation }) => {
                     />
                 </Pressable>
             </View>
-
-            {/* <View style={{ marginBottom: 10 }}>
-                <View style={{
-                    borderWidth: 1,
-                    borderColor: '#ddd',
-                    borderRadius: 6,
-                    height: 50,
-                    justifyContent: 'center',
-                    fontSize: 10,
-                }}>
-                    <Picker
-                    selectedValue={ticketType}
-                    onValueChange={(itemValue) => setTicketType(itemValue)}
-                    >
-                    <Picker.Item allowFontScaling={false} label="Owned by me" value="me" />
-                    <Picker.Item allowFontScaling={false} label="Owned by organization" value="org" />
-                    </Picker>
-                </View>
-            </View> */}
 
             <View style={{ marginBottom: 10 }}>
   <TouchableOpacity
@@ -411,9 +350,7 @@ const ViewTicket = ({ navigation }) => {
                     )}
                     showsVerticalScrollIndicator={false}
                     keyExtractor={(item) => item.ticketId}
-                    //contentContainerStyle={{ paddingBottom: 200, }}
                     contentContainerStyle={{ paddingBottom: 420, paddingTop: 0, flexDirection: 'column-reverse',}}
-                    //ListFooterComponent={<View style={{ height: 290 }} />}
                     renderItem={({ item }) => (
                     <Pressable
                         onPress={() =>
@@ -430,10 +367,6 @@ const ViewTicket = ({ navigation }) => {
                             <Text
                             allowFontScaling={false}
                             style={styles.cell}
-                            // style={[
-                            //     styles.cell,
-                            //     item.status === '173580713' && styles.closedStatus,
-                            // ]}
                             >
                             {getStatusText(item.ownerId)}
                             </Text>
@@ -443,20 +376,10 @@ const ViewTicket = ({ navigation }) => {
                     )}
                 />
 
-                {/* {!loading && tickets.length === 0 && (
-                    <Text allowFontScaling={false} style={styles.noTicketText}>No tickets found</Text>
-                )} */}
-
               {!loading &&
                 tickets.filter(item => item.customer_portal === '' || item.customer_portal === ' ' || item.customer_portal === 'False' || item.customer_portal === false).length === 0 && (
                     <Text style={styles.noTicketText}>No tickets found</Text>
                 )}
-
-
-                
-
-
-
 
                 </View>
         </View>
@@ -493,7 +416,6 @@ const styles = StyleSheet.create({
 
 
     ticketContainer: {
-        //flex: 1,
         marginTop: 10,
     },
 

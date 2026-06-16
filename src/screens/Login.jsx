@@ -30,8 +30,6 @@ const Login = () => {
 const handleSubmit = async () => {
   setLoading(true);
 
-  // https://syilappcustomer.onrender.com/check_login_detail
-
   try {
       const response = await fetch(
         'https://syilappcustomer.onrender.com/check_login_detail',
@@ -53,14 +51,13 @@ const handleSubmit = async () => {
       return;
     }
 
-    // ✅ LOGIN SUCCESS
+    // LOGIN SUCCESS
     await AsyncStorage.setItem('isLoggedIn', 'true');
     await AsyncStorage.setItem(
       'lastLoginTime',
       Date.now().toString()
     );
     await AsyncStorage.setItem('userEmail', username);
-    //await AsyncStorage.setItem('userData', JSON.stringify(result.user));
     setContactId(result.contactId);
     await AsyncStorage.setItem(
       'userData',
@@ -114,10 +111,9 @@ const handleSubmit = async () => {
       <KeyboardAvoidingView
                 style={{ flex: 1 }}
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} // adjust if you have headers
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} 
               >
       <ScrollView contentContainerStyle={styles.container}
-        // keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}>
         
         {/* Logo */}
@@ -200,8 +196,6 @@ const handleSubmit = async () => {
 
       <Modal visible={loading} transparent animationType="fade">
         <View style={styles.loadingOverlay}>
-          {/* You can uncomment the GIF if you want */}
-          {/* <Image source={require('../../images/loading.gif')} style={styles.loadingGif} /> */}
           <Text allowFontScaling={false} style={styles.loadingText}>Please wait...</Text>
         </View>
       </Modal>

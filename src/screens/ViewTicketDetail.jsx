@@ -79,8 +79,6 @@ const ViewTicketDetail = ({ navigation }) => {
     }, [])
   );
 
-  //const isChen = email === 'manish.dalotra@techstriker.com';
-
   /* ================= CONVERSATION ================= */
   useFocusEffect(
     useCallback(() => {
@@ -108,32 +106,6 @@ const ViewTicketDetail = ({ navigation }) => {
       fetchTicketConversation();
     }, [ticketId])
   );
-
-
-
-  // const handleReply = async () => {
-  // const subjectEncoded = encodeURIComponent(`Re: ${dynamicSubject}`);
-  // const bodyEncoded = encodeURIComponent("Hello Support SYIL,");
-
-  // const gmailURL = `googlegmail://co?to=${dynamicEmail}&subject=${subjectEncoded}&body=${bodyEncoded}`;
-  // const appStoreURL = 'https://apps.apple.com/app/gmail-email-by-google/id422689480';
-  // const mailURL = `mailto:${dynamicEmail}?subject=${subjectEncoded}&body=${bodyEncoded}`;
-
-  // if (Platform.OS === 'ios') {
-  //   const canOpenGmail = await Linking.canOpenURL('googlegmail://');
-
-  //   if (canOpenGmail) {
-  //     Linking.openURL(gmailURL);
-  //   } else {
-  //     Linking.openURL(appStoreURL);
-  //   }
-  //   } else {
-  //     // Android → Gmail automatically open ho jata hai mostly
-  //     Linking.openURL(mailURL);
-  //   }
-  // };
-
-
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -165,7 +137,6 @@ const ViewTicketDetail = ({ navigation }) => {
   const channelAccountId = outgoingMessage?.channelAccountId;
   const channelId = outgoingMessage?.channelId;
   const conversationsThreadId = initialMessage?.conversationsThreadId;
-  //const initialMessageemail = initialMessage?.senderName; 
 
   console.log('Initial Message:', conversationsThreadId);
  
@@ -174,7 +145,6 @@ const ViewTicketDetail = ({ navigation }) => {
     .find(msg => msg.direction === 'INCOMING' && msg.senderName?.includes('@'));
 
   const incomingEmail = initialMessage?.senderName;
-  //const incomingSubject = incomingMessage?.subject;
 
   const incomingSubject = incomingMessage?.subject;
 
@@ -406,23 +376,6 @@ console.log('Selected files before upload:', selectedFiles);
                 <Text allowFontScaling={false} style={styles.senderName}>{getSenderName(item)}</Text>
                 <Text allowFontScaling={false} style={styles.messageText}>{item.text || ''}</Text>
 
-                 {/* Attachments */}
-                  {/* <Text allowFontScaling={false} >{item.attachments}</Text> */}
-                
-
-                {/* {item.attachments && item.attachments.length > 0 && (
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginTop: 5,  }}>
-                    {item.attachments.map((attachment, index) => (
-                      <Image
-                        key={index}
-                        source={{ uri: attachment.url }}
-                        style={styles.attachmentImage}
-                      />
-                      // <Text>{attachment.url}</Text>
-                    ))}
-                  </View>
-                )} */}
-
 
                 {item.attachments && item.attachments.length > 0 && (
   <View style={{ marginTop: 5 }}>
@@ -471,25 +424,6 @@ console.log('Selected files before upload:', selectedFiles);
           {!loading && messages.length === 0 && (
             <Text allowFontScaling={false} style={styles.noTicketText}>No conversation found</Text>
           )}
-
-          {/* {messages.length === 1 ? (
-            <Text allowFontScaling={false} style={[styles.ReplyStyle, { backgroundColor: '#999' }]}>
-              Please wait for the support reply.
-            </Text>
-          ) : hasOutgoing ? (
-            <Text
-            allowFontScaling={false}
-              style={styles.ReplyStyle}
-              onPress={handleReply}
-              // onPress={() =>
-              //   Linking.openURL(
-              //     `mailto:${dynamicEmail}?subject=Re:%20${encodeURIComponent(dynamicSubject)}&body=${encodeURIComponent("Hello Support SYIL,")}`
-              //   )
-              // }
-            >
-              Reply to Support Team
-            </Text>
-          ) : null} */}
 
           {appSupportTeamMember === true ? (
            
@@ -541,7 +475,7 @@ console.log('Selected files before upload:', selectedFiles);
         <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} // adjust if you have headers
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>

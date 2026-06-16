@@ -41,7 +41,7 @@ const ForgotPassword = () => {
       if (!response.ok) {
         alert(result.message || 'Please enter a valid email.');
       } else {
-        //alert(result.message); // Thank you message
+        
         Alert.alert(     
         'Success',    
         result.message,
@@ -116,10 +116,7 @@ const ForgotPassword = () => {
 
         <Modal visible={loading} transparent animationType="fade">
             <View style={styles.loadingContainer}>
-                {/* <Image
-                source={require('../../images/loading.gif')}
-                style={styles.loadingGif}
-                /> */}
+                
                 <Text allowFontScaling={false} style={{ fontSize:24,fontWeight:700 }}>Please wait...</Text>
             </View>
         </Modal>

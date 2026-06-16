@@ -32,55 +32,6 @@ const Ticket = () => {
   const [showPriorityModal, setShowPriorityModal] = useState(false);
   
 
-  
-  
-
-
-//   const requestGalleryPermission = async () => {
-//   if (Platform.OS !== 'android') return true;
-
-//   try {
-//     const granted = await PermissionsAndroid.request(
-//       PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-//       {
-//         title: 'Gallery Permission',
-//         message: 'App needs access to your photos and videos',
-//         buttonPositive: 'Allow',
-//         buttonNegative: 'Cancel',
-//       }
-//     );
-
-//     return granted === PermissionsAndroid.RESULTS.GRANTED;
-//   } catch (err) {
-//     console.warn(err);
-//     return false;
-//   }
-// };
-
-// const pickFiles = async () => {
-//   const hasPermission = await requestGalleryPermission();
-
-//   if (!hasPermission) {
-//     Alert.alert(
-//       'Permission Required',
-//       'Please allow gallery access to upload photos/videos'
-//     );
-//     return;
-//   }
-
-//   launchImageLibrary(
-//     {
-//       mediaType: 'mixed',
-//       selectionLimit: 0,
-//     },
-//     response => {
-//       if (!response.didCancel && response.assets) {
-//         setFiles(response.assets);
-//       }
-//     }
-//   );
-// };
-
 const pickFiles = () => {
   launchImageLibrary(
     {
@@ -247,7 +198,7 @@ const formatCategoryLabel = (key) => {
 
 
         let emailResult;
-        emailResult = await responseEmail.json(); // read once
+        emailResult = await responseEmail.json();
         console.log('emailResult--- ' , emailResult.contactId);
 
       if (!responseEmail.ok) {
@@ -264,7 +215,7 @@ const formatCategoryLabel = (key) => {
 
 
 
-      // 2️⃣ Create Ticket
+    
       const responseTicket = await fetch('https://syilappcustomer.onrender.com/create-ticket', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -274,11 +225,11 @@ const formatCategoryLabel = (key) => {
       let dataTest = JSON.stringify({ contactId, ticketData });
       console.log('dataTest---- ' , dataTest);
 
-      const textTicket = await responseTicket.json(); // read once
+      const textTicket = await responseTicket.json();
       console.log('textTicket--- ' , textTicket);
       let ticketResult;
       if (responseTicket.ok) {
-        //alert('Ticket created successfully!');
+        
         setLoading(false);
         console.log('textTicket---- ' , textTicket.mobile_ticket_id)
         Alert.alert(
@@ -317,7 +268,7 @@ const formatCategoryLabel = (key) => {
       <KeyboardAvoidingView
               style={{ flex: 1 }}
               behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-              keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} // adjust if you have headers
+              keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} 
             >
       <View style={[styles.header, { height: 45, paddingTop: 0 }]}>
         <TouchableOpacity
@@ -335,21 +286,6 @@ const formatCategoryLabel = (key) => {
         
     <ScrollView contentContainerStyle={styles.container} >
 
-
-      
-
-
-      {/* <Pressable
-      onPress={() => navigation.navigate('Home')} 
-      style={styles.card} hitSlop={{ top: 0, bottom: 10, left: 10, right: 10 }}>
-      <View style={styles.flexClass}>
-        <Image
-          source={require('../../images/right_arrow.png')}
-          style={styles.arrowIcon}
-        />
-        <Text allowFontScaling={false} style={styles.labelText}>New Ticket</Text>
-      </View>
-      </Pressable> */}
       
       <View style={styles.containerStyle}>
       <Text allowFontScaling={false} style={styles.label}>Your Email <Text allowFontScaling={false} style={styles.errorColor}>*</Text></Text>
@@ -375,7 +311,6 @@ const formatCategoryLabel = (key) => {
       )}
 
       <Text allowFontScaling={false} style={styles.label}>Company Name</Text>
-      {/* <Text allowFontScaling={false}>Enter the (company) name of the end-customer that is having the issue</Text> */}
       <TextInput
       allowFontScaling={false}
         style={styles.input}
@@ -385,28 +320,6 @@ const formatCategoryLabel = (key) => {
         placeholderTextColor="#999"
       />
 
-      {/* <Text allowFontScaling={false} style={styles.label}>Machine Type</Text>
-      <View style={styles.pickerWrapper}>
-      <Picker
-        mode="dropdown"
-        selectedValue={machineType}
-        onValueChange={setMachineType}
-        style={[
-          styles.picker,
-          {
-            color: machineType === '' ? '#999' : '#000'
-          }
-        ]}
-      >
-        <Picker.Item color="#999" style={styles.pickerItems} label="Please Select" value="" />
-        <Picker.Item style={styles.pickerItems} label="X5" value="X5" />
-        <Picker.Item style={styles.pickerItems} label="X7" value="X7" />
-        <Picker.Item style={styles.pickerItems} label="X9" value="X9" />
-        <Picker.Item style={styles.pickerItems} label="X11" value="X11" />
-        <Picker.Item style={styles.pickerItems} label="L2" value="L2" />
-        <Picker.Item style={styles.pickerItems} label="L3" value="L3" />
-      </Picker>
-      </View> */}
 
       <Text allowFontScaling={false} style={styles.label}>Machine Type</Text>
 
@@ -484,22 +397,6 @@ const formatCategoryLabel = (key) => {
         
       />
       <Text allowFontScaling={false} style={styles.label}>Category</Text>
-
-      {/* {Object.keys(categories).map(key => (
-        <View key={key} style={styles.checkboxRow}>
-          <CheckBox
-            style={styles.checkboxStyle}
-            value={categories[key]}
-            onValueChange={value =>
-              setCategories({ ...categories, [key]: value })
-            }
-            tintColors={{ false: '#000', true: '#000' }}
-          />
-          <Text allowFontScaling={false} style={styles.checkboxText}>
-            {formatCategoryLabel(key)}
-          </Text>
-        </View>
-      ))} */}
 
       {Object.keys(categories).map(key => (
         <View key={key} style={styles.checkboxRow}>
@@ -586,10 +483,6 @@ const formatCategoryLabel = (key) => {
         ))
       )}
 
-      {/* <View style={styles.checkboxRow}>
-        <CheckBox value={warranty} tintColors={{ false: '#000', true: '#000' }} onValueChange={setWarranty} />
-        <Text allowFontScaling={false} style={styles.checkboxText}>Warranty</Text>
-      </View> */}
 
         <View style={styles.checkboxRow}>
   
@@ -616,24 +509,6 @@ const formatCategoryLabel = (key) => {
         </View>
 
 
-      {/* <Text allowFontScaling={false} style={styles.label}>Priority</Text>
-      <View style={styles.pickerWrapper}>
-      <Picker
-        selectedValue={priority}
-        onValueChange={setPriority}
-        style={[
-          styles.picker,
-          {
-            color: priority === '' ? '#999' : '#000'
-          }
-        ]}
-      >
-        <Picker.Item color="#999" style={styles.pickerItems} label="Please Select" value="" />
-        <Picker.Item style={styles.pickerItems} label="Low" value="low" />
-        <Picker.Item style={styles.pickerItems} label="Medium" value="medium" />
-        <Picker.Item style={styles.pickerItems} label="High" value="high" />
-      </Picker>
-      </View> */}
 
       <Text allowFontScaling={false} style={styles.label}>Priority</Text>
 
@@ -656,7 +531,7 @@ const formatCategoryLabel = (key) => {
                 key={item.value}
                 style={{ padding:15, borderBottomWidth:1 }}
                 onPress={() => {
-                  setPriority(item.value); // SAME VALUE (important)
+                  setPriority(item.value);
                   setShowPriorityModal(false);
                 }}
               >
@@ -683,10 +558,6 @@ const formatCategoryLabel = (key) => {
 
       <Modal visible={loading} transparent animationType="fade">
         <View style={styles.loadingContainer}>
-          {/* <Image
-            source={require('../../images/loading.gif')}
-            style={styles.loadingGif}
-          /> */}
           <Text allowFontScaling={false} style={{ fontSize:24,fontWeight:700 }}>Please wait...</Text>
         </View>
       </Modal>

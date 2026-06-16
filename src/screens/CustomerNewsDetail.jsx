@@ -334,7 +334,6 @@ const styles = StyleSheet.create({
     height: 65,
     flexDirection: 'row',
     alignItems: 'center',
-    //paddingHorizontal: 16,
   },
 
   arrowIcon: {

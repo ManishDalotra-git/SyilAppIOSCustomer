@@ -31,7 +31,6 @@ const OwnerTickets = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [appSupportTeamMember, setAppSupportTeamMember] = useState(false);
 
-  // 👉 you can pass dynamically later
   const ownerId = route.params?.ownerId || '35998790';
 
 
@@ -105,14 +104,6 @@ const senderActorId = ownerData.OwnerUserID
 
 console.log('Final senderActorId:', senderActorId);
 
-// setSenderActorId(senderActorId)
-// console.log('SenderActorId---- ', senderActorId);
-
-
-
-
-          //http://192.168.0.84:3000/
-          //https://syilapp-w8ye.onrender.com/get_owner_tickets
 
           const response = await fetch(
             'https://syilappcustomer.onrender.com/get_owner_ticket',
@@ -307,15 +298,7 @@ console.log('Final senderActorId:', senderActorId);
           {/* HEADER */}
           <View style={styles.flexClass}>
                 <Pressable onPress={() => navigation.navigate('Profile')}>
-                    {/* <Image
-                    source={require('../../images/right_arrow.png')}
-                    style={styles.rightarrowIcon}
-                    /> */}
-    
-                    {/* <Image
-                        source={require('../../images/profile_icon.png')}
-                        style={styles.profileImage}
-                    /> */}
+                  
                     <View style={styles.initialsAvatar}>
                         <Text style={styles.initialsText}>
                         {getInitials(firstName, lastName)}
@@ -388,9 +371,6 @@ console.log('Final senderActorId:', senderActorId);
               )}
             />
 
-            {/* {!loading && tickets.length === 0 && (
-              <Text style={styles.noTicketText}>No tickets found</Text>
-            )} */}
 
               {!loading &&
                 tickets.filter(item => item.customer_portal === '' || item.customer_portal === ' ' || item.customer_portal === 'False' || item.customer_portal === false).length === 0 && (
@@ -433,7 +413,6 @@ const styles = StyleSheet.create({
 
 
     ticketContainer: {
-        //flex: 1,
         marginTop: 10,
     },
 

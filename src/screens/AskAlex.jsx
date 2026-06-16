@@ -81,7 +81,6 @@ const renderFormattedText = (text, isTyping = false) => {
       );
     }
 
-    // Normal lines
     return (
       <Text allowFontScaling={false} key={index} style={{ fontWeight: '400', color: '#000' }}>
         {line + suffix}
@@ -123,7 +122,6 @@ const AskAlex = () => {
 
   const navigation = useNavigation();
   const route = useRoute();
-  //const currentRoute = route.name;
   const flatListRef = useRef(null);
 
   const [messages, setMessages] = useState(defaultMessages);
@@ -286,7 +284,7 @@ const AskAlex = () => {
       <KeyboardAvoidingView
           style={{ flex: 1 }}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} // adjust if you have headers
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0} 
         >
 
         
@@ -343,7 +341,6 @@ const AskAlex = () => {
 
 export default AskAlex;
 
-// 🎨 Styles
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,

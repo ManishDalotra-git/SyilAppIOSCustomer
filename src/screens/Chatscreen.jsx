@@ -11,7 +11,6 @@ const Chatscreen = () => {
 
   const navigation = useNavigation();
 
-  // 🔥 3 sec delay before opening chat
   const injectedJS = `
     setTimeout(() => {
       function openChat() {
@@ -31,7 +30,7 @@ const Chatscreen = () => {
   return (
     <View style={{ flex: 1 }}>
 
-      {/* HEADER */}
+      
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Image
@@ -43,14 +42,14 @@ const Chatscreen = () => {
         <Text style={styles.headerTitle}>Ask Alex</Text>
       </View>
 
-      {/* LOADING OVERLAY */}
+      
       {!chatReady && (
         <View style={styles.loadingBox}>
           <Text style={styles.loadingText}>Loading chat...</Text>
         </View>
       )}
 
-      {/* WEBVIEW */}
+      
       <WebView
         source={{ uri: 'https://syil.com/mobile-chat-support-for-kb' }}
 
@@ -60,7 +59,7 @@ const Chatscreen = () => {
         injectedJavaScript={injectedJS}
 
         onLoadEnd={() => {
-          // show loading for 3 sec minimum
+          
           setTimeout(() => {
             setChatReady(true);
           }, 3000);

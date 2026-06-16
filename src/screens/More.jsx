@@ -19,31 +19,6 @@ const More = ({ navigation }) => {
     const [email, setEmail] = useState('');
     const [appSupportTeamMember, setAppSupportTeamMember] = useState(false);
 
-    // const [user, setUser] = useState(null);
-
-    // useEffect(() => {
-    //     const getUser = async () => {
-    //     const data = await AsyncStorage.getItem('userData');
-    //     if (data) {
-    //         setUser(JSON.parse(data));
-    //     }
-    //     };
-    //     getUser();
-    // }, []);
-
-    // useEffect(() => {
-    //     const userData = async () => {
-    //     const userFirstName = await AsyncStorage.getItem('userFirstName');
-    //     const userLastName = await AsyncStorage.getItem('userLastName');
-    //     if (userFirstName) setFirstName(userFirstName);
-    //     if (userLastName) setLastName(userLastName);
-    //     console.log('userFirstName-- ', userFirstName);
-    //     console.log('userLastName-- ', userLastName);
-    //     };
-    //     userData();
-    // }, []);
-
-
     useFocusEffect(
         useCallback(() => {
             const loadUserName = async () => {
@@ -88,15 +63,7 @@ const More = ({ navigation }) => {
             {/* HEADER */}
             <View style={styles.flexClass}>
                 <Pressable onPress={() => navigation.navigate('Profile')}>
-                    {/* <Image
-                    source={require('../../images/right_arrow.png')}
-                    style={styles.rightarrowIcon}
-                    /> */}
-    
-                    {/* <Image
-                        source={require('../../images/profile_icon.png')}
-                        style={styles.profileImage}
-                    /> */}
+                    
                     <View style={styles.initialsAvatar}>
                         <Text allowFontScaling={false} style={styles.initialsText}>
                         {getInitials(firstName, lastName)}
@@ -130,16 +97,6 @@ const More = ({ navigation }) => {
             </TouchableOpacity>
             )}
 
-            {/* {email === 'manish.dalotra@techstriker.com' && (
-            <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('OwnerTickets')} >
-                <View style={styles.left}>
-                <Image source={require('../../images/ArticleIcon.png')} style={styles.icon} />
-                <Text allowFontScaling={false} style={styles.text}>Owner Tickets</Text>
-                </View>
-                <Image source={require('../../images/left_arrow.png')} style={styles.Leftarrow} />
-            </TouchableOpacity>
-            )} */}
-
 
             <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('Chatscreen')} >
                 <View style={styles.left}>
@@ -148,15 +105,6 @@ const More = ({ navigation }) => {
                 </View>
                 <Image source={require('../../images/left_arrow.png')} style={styles.Leftarrow} />
             </TouchableOpacity>
-
-            {/* Ask Alex */}
-            {/* <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('AskAlex')} >
-                <View style={styles.left}>
-                <Image source={require('../../images/ask.png')} style={styles.icon} />
-                <Text allowFontScaling={false} style={styles.text}>Ask Alex</Text>
-                </View>
-                <Image source={require('../../images/left_arrow.png')} style={styles.Leftarrow} />
-            </TouchableOpacity> */}
 
             {/* Feedback */}
             <TouchableOpacity onPress={() => navigation.navigate('Feedback')} style={styles.row}>

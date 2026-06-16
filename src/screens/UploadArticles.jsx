@@ -27,95 +27,16 @@ const UploadArticle = ({ navigation }) => {
   const API_URL = 'https://syilappcustomer.onrender.com/upload-articles';
 
 
-  // const handleSelectFile = async () => {
-  //   try {
-  //     // const res = await DocumentPicker.pick({
-  //     //   type: ['application/json'], 
-  //     // });
-
-  //     const res = await DocumentPicker.pick({
-  //       type: [DocumentPicker.types.allFiles],
-  //     });
-
-  //     const file = res[0];
-      
-
-  //     if (!file) {
-  //       Alert.alert('Error', 'File not selected');
-  //       return;
-  //     }
-
-  //     const isJsonByName = file.name?.toLowerCase().endsWith('.json');
-  //     if (!isJsonByName) {
-  //       Alert.alert('Invalid File', 'Please select a JSON file');
-  //       return;
-  //     }
-
-  //     // const fileUri = file.uri;
-  //     // const destPath = `${RNFS.CachesDirectoryPath}/${file.name}`;
-
-  //     // await RNFS.copyFile(fileUri, destPath);
-  //     // const content = await RNFS.readFile(destPath, 'utf8');
-
-  //     const fileUri = file.uri.replace('file://', ''); // important for iOS
-
-  //     const content = await RNFS.readFile(fileUri, 'utf8');
-
-  //     console.log(file);
-
-  //     const parsed = JSON.parse(content);
-
-  //     setJsonContent(parsed);
-  //     setFileName(file.name);
-
-  //     Alert.alert('Success', 'JSON file loaded successfully');
-  //   } catch (err) {
-  //     if (err?.code === 'DOCUMENT_PICKER_CANCELED') {
-  //       console.log('User cancelled document picker');
-  //       return;
-  //     }
-
-  //     console.log('JSON Pick Error:', err);
-  //     Alert.alert('Error', 'Invalid JSON file or error occurred');
-  //   }
-  // };
-
-  // ✅ REPLACE articles.json
-  // const handleReplaceArticle = async () => {
-  //   if (!jsonContent) {
-  //     Alert.alert('Error', 'Please select a JSON file first');
-  //     return;
-  //   }
-
-  //   try {
-  //     // Save file to DocumentDirectoryPath (persistent)
-  //     const destPath = `${RNFS.DocumentDirectoryPath}/articles.json`;
-
-  //     await RNFS.writeFile(
-  //       destPath,
-  //       JSON.stringify(jsonContent, null, 2),
-  //       'utf8'
-  //     );
-
-  //     Alert.alert('Success', 'articles.json updated successfully');
-  //     navigation.goBack();
-  //   } catch (err) {
-  //     console.log('Write Error:', err);
-  //     Alert.alert('Error', 'Failed to update articles.json');
-  //   }
-  // };
-
-
 const handleSelectFile = async () => {
   try {
     const res = await DocumentPicker.pick({
       type: [DocumentPicker.types.allFiles],
-      copyTo: 'cachesDirectory', // try this
+      copyTo: 'cachesDirectory',
     });
 
     const file = res[0];
 
-    console.log('FILE OBJECT:', file); // 👈 IMPORTANT DEBUG
+    console.log('FILE OBJECT:', file);
 
     if (!file) {
       Alert.alert('Error', 'File not selected');
@@ -128,7 +49,6 @@ const handleSelectFile = async () => {
       return;
     }
 
-    // ⭐ SAFE URI HANDLING
     const uri = file.fileCopyUri || file.uri;
     setFileUri(uri); 
 
@@ -158,41 +78,6 @@ const handleSelectFile = async () => {
 };
 
 
-//   const handleReplaceArticle = async () => {
-//   if (!jsonContent) {
-//     Alert.alert('Error', 'Please select a JSON file first');
-//     return;
-//   }
-
-//   try {
-//     const formData = new FormData();
-//     formData.append('file', {
-//       uri: fileUri,
-//       name: fileName,
-//       type: 'application/json',
-//     });
-
-//     const response = await fetch(API_URL, {
-//       method: 'POST',
-//       body: formData,
-//       headers: {
-//         'Content-Type': 'multipart/form-data',
-//       },
-//     });
-
-//     if (!response.ok) {
-//       throw new Error('Upload failed');
-//     }
-
-//     Alert.alert('Success', 'Articles updated for all users');
-//     navigation.goBack();
-//   } catch (err) {
-//     console.log(err);
-//     Alert.alert('Error', 'Failed to upload articles');
-//   }
-// };
-
-
 const handleReplaceArticle = async () => {
   if (!jsonContent || !fileUri) {
     Alert.alert('Error', 'Please select a JSON file first');
@@ -203,7 +88,7 @@ const handleReplaceArticle = async () => {
     const formData = new FormData();
 
     formData.append('file', {
-      uri: fileUri, // ✅ REAL FILE PATH
+      uri: fileUri,
       name: fileName,
       type: 'application/json',
     });
@@ -239,9 +124,6 @@ const handleReplaceArticle = async () => {
 
     <View style={styles.container}>
 
-      
-
-      {/* <Text allowFontScaling={false} style={styles.title}>Upload Articles JSON</Text> */}
 
       <TouchableOpacity style={styles.button} onPress={handleSelectFile}>
         <Text allowFontScaling={false} style={styles.buttonText}>Select JSON File</Text>

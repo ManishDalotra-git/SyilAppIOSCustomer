@@ -190,8 +190,8 @@ useFocusEffect(
           <Text allowFontScaling={false} style={styles.cardDesc}>
             Sales presentations, Manuals, Technical Files and more.
           </Text>
-        </View>
-      </Pressable>
+        </View> 
+      </Pressable> 
 
       <Pressable onPress={() => navigation.navigate('Ticket')} style={styles.card}>
         <View style={styles.cardFlex}>

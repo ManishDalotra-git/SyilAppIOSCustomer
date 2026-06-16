@@ -175,7 +175,7 @@ useFocusEffect(
       </View>
     </TouchableOpacity>
   )}
-</View>
+</View> 
 
       <Text allowFontScaling={false} style={styles.welcome} >Customer Portal</Text>
 
@@ -218,7 +218,7 @@ useFocusEffect(
 export default Home
 
 const styles = StyleSheet.create({
-  background: { 
+  background: {  
     flex:1, 
   },
   container: {

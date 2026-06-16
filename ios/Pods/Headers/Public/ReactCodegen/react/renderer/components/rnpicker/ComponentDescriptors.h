@@ -1,0 +1,1 @@
+../../../../../../../../build/generated/ios/ReactCodegen/react/renderer/components/rnpicker/ComponentDescriptors.h

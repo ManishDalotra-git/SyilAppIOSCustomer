@@ -1,0 +1,19 @@
+diff --git a/node_modules/react-native-image-picker/react-native-image-picker.podspec b/node_modules/react-native-image-picker/react-native-image-picker.podspec
+index 4df93d4..a90d787 100644
+--- a/node_modules/react-native-image-picker/react-native-image-picker.podspec
++++ b/node_modules/react-native-image-picker/react-native-image-picker.podspec
+@@ -15,9 +15,11 @@ Pod::Spec.new do |s|
+   s.source       = { :git => "https://github.com/react-native-image-picker/react-native-image-picker.git", :tag => "v#{s.version}" }
+   s.source_files  = "ios/*.{h,m,mm}"
+ 
+-  s.resource_bundles = {
+-    'RNImagePickerPrivacyInfo' => ['ios/PrivacyInfo.xcprivacy'],
+-  }
++  # s.resource_bundles = {
++  #   'RNImagePickerPrivacyInfo' => ['ios/PrivacyInfo.xcprivacy'],
++  # }
++
++  s.resources = ['ios/PrivacyInfo.xcprivacy']
+ 
+   s.frameworks   = 'Photos','PhotosUI', 'AVFoundation', 'CoreMedia'
+ 

@@ -1,0 +1,18 @@
+# Android build
+android/app/build/
+android/build/
+android/.gradle/
+android/app/.cxx/
+
+# APKs
+*.apk
+*.aab
+*.so
+
+# Node
+node_modules/
+
+# Logs
+*.log
+
+.env

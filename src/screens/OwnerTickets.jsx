@@ -1,0 +1,487 @@
+import React, { useCallback, useState } from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TouchableOpacity,
+  ImageBackground,
+  StatusBar,
+  Platform,
+  Pressable,
+  FlatList,
+} from 'react-native';
+import { useRoute, useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Footer from './components/Footer';
+
+const OwnerTickets = ({ navigation }) => {
+
+  StatusBar.setTranslucent(true);
+  StatusBar.setBackgroundColor('transparent');
+  StatusBar.setBarStyle('dark-content');
+
+  const route = useRoute();
+  const currentRoute = route.name;
+
+  const [tickets, setTickets] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [appSupportTeamMember, setAppSupportTeamMember] = useState(false);
+
+  // 👉 you can pass dynamically later
+  const ownerId = route.params?.ownerId || '35998790';
+
+
+  useFocusEffect(
+        useCallback(() => {
+            const loadUserName = async () => {
+            const userFirstName = await AsyncStorage.getItem('userFirstName');
+            const userLastName = await AsyncStorage.getItem('userLastName');
+            const savedEmail = await AsyncStorage.getItem('userEmail');
+
+            console.log('FOCUS firstName:', userFirstName);
+            console.log('FOCUS lastName:', userLastName);
+            console.log('FOCUS savedEmail:', savedEmail);
+
+            setFirstName(userFirstName || '');
+            setLastName(userLastName || '');
+            setEmail(savedEmail || '');
+
+            const AppSupportTeamMember = await AsyncStorage.getItem('app_support_team_member');
+    console.log('AppSupportTeamMember:', AppSupportTeamMember);
+    
+
+    if(AppSupportTeamMember === 'Yes'){
+      setAppSupportTeamMember(true);
+      console.log('AppSupportTeamMember---yes:', AppSupportTeamMember);
+    }
+
+            };
+
+            loadUserName();
+        }, [])
+    );
+
+    const getInitials = (firstName = '', lastName = '') => {
+        const f = firstName?.charAt(0)?.toUpperCase() || '';
+        const l = lastName?.charAt(0)?.toUpperCase() || '';
+        return `${f}${l}`;
+    };
+
+  useFocusEffect(
+    useCallback(() => {
+
+      if (!email) return;
+
+
+      const fetchTickets = async () => {
+        try {
+          setLoading(true);
+
+console.log('email-----email---- ' , email);
+
+          const ownerRes = await fetch(
+      'https://syilappcustomer.onrender.com/get-owner-id',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email }),
+      }
+);
+
+const ownerRaw = await ownerRes.text();
+console.log('Owner RAW response:', ownerRaw);
+console.log('Owner status:', ownerRes.status);
+
+const ownerData = JSON.parse(ownerRaw);
+console.log('ownerId mila:', ownerData.OwnerUserID);
+
+const senderActorId = ownerData.OwnerUserID
+  ? `${ownerData.OwnerUserID}`
+  : '35998790';
+
+console.log('Final senderActorId:', senderActorId);
+
+// setSenderActorId(senderActorId)
+// console.log('SenderActorId---- ', senderActorId);
+
+
+
+
+          //http://192.168.0.84:3000/
+          //https://syilapp-w8ye.onrender.com/get_owner_tickets
+
+          const response = await fetch(
+            'https://syilappcustomer.onrender.com/get_owner_ticket',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                ownerId: senderActorId || '35998790',
+                }),
+            }
+          );
+
+          const data = await response.json();
+          console.log('data---- ', data);
+          
+          setTickets(data.tickets || []);
+          setLoading(false);
+
+        } catch (error) {
+          console.log('Owner ticket error:', error);
+          setLoading(false);
+        }
+      };
+
+      fetchTickets();
+    }, [ownerId, email])
+  );
+
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
+  };
+
+  const getStatusText = (ownerId) => {
+        switch (ownerId) {
+            case '3565407':
+            return 'Tech Striker';
+            case '4179990':
+            return 'Pete Nicholls';
+            case '18263262':
+            return 'Jorge Murillo';
+            case '28520943':
+            return 'Paavo Laaksonen';
+            case '31659248':
+            return 'Mr. Xushuo';
+            case '34789817':
+            return 'Frans Buikema';
+            case '35998790':
+            return 'Mr. Chen';
+            case '37497897':
+            return 'Wesley Wang';
+            case '39025454':
+            return 'Ulises Rivera';
+            case '60897705':
+            return 'Ken Zhong';
+            case '75260402':
+            return 'Petr Dostálek';
+            case '75329423':
+            return 'Ashot Margaryan';
+            case '75539833':
+            return 'Nico Hugo';
+
+            case '75539885':
+            return 'Lev Levaneusky';
+            case '76556861':
+            return 'ANTOINE CAGLIOTI';
+            case '76783421':
+            return 'Gergő Peresztegi-Nagy';
+            case '77228346':
+            return 'Adinath Parmaj';
+            case '77549745':
+            return 'Yolyn Sam';
+            case '78114697':
+            return 'Nicola Roberts';
+            case '78929149':
+            return 'Doris Zhang';
+            case '79421375':
+            return 'Alex';
+            case '80841596':
+            return 'Xiaoyi Wu';
+            case '81074581':
+            return 'Luka Kljajić';
+            case '81074588':
+            return 'Renaud Perrin';
+            case '81074589':
+            return 'Manuel Weiss';
+            case '81952028':
+            return 'Marc Kneeshaw';
+            case '81952029':
+            return 'Gary Kneeshaw';
+            case '82116023':
+            return 'Ludwin Lai';
+            case '82335884':
+            return 'Mavis Xu';
+            case '82335897':
+            return 'Molly Che';
+            case '82431058':
+            return 'Fawad Khawaja';
+            case '82472467':
+            return 'Ramya Poobathy';
+            case '82573946':
+            return 'Dimitris Orfanidis';
+            case '84095697':
+            return 'gary.wallace@syil.com';
+            case '84095698':
+            return 'andrew.boyd@syil.com';
+            case '85488871':
+            return 'procurement@gmtgulf.com';
+            case '85722551':
+            return 'otorres@hartmetallgroup.com';
+            case '85722552':
+            return 'ivan.campos@campostools.com';
+            case '85722553':
+            return 'Radu Florin Plaiasu';
+            case '85722554':
+            return 'yossi@amg-machinery.com';
+            case '85722555':
+            return 'Walid MEZGHANI';
+            case '85722556':
+            return 'dan radulescu';
+            case '85917932':
+            return 'subhi jain';
+            case '86106481':
+            return 'GMT SYIL Support';
+            case '86405174':
+            return 'Anna Avetisyan';
+            case '86405237':
+            return 'Christian Scott';
+            case '86405372':
+            return 'sales@gmtgulf.com';
+            case '86406673':
+            return 'Yew Yeen Lee';
+            case '87350983':
+            return 'eric@syil.com';
+            case '149082415':
+            return 'Lee Wilkinson';
+            case '347885886':
+            return 'Brian Ang';
+            case '561953197':
+            return 'Evgeniya Ustyuzhanina';
+            case '562969186':
+            return 'Stefan Remde';
+            case '685062721':
+            return 'ROXANA CARRETO';
+            case '730476349':
+            return 'Marcus Refsgaard-Schuhmacher';
+
+            case '739253069':
+            return 'Richard Chagnon';
+            case '972378267':
+            return 'mentari@3dzaiku.com';
+            case '1041824695':
+            return 'Michal Pecina';
+            case '1161041533':
+            return 'James Mak';
+            case '1532728806':
+            return 'Joosia Miettinen';
+            case '1560210639':
+            return 'Tom Marshallsay';
+            case '1682515558':
+            return 'Chris Keller';
+            case '1785961231':
+            return 'Siarhei Melianchuk';
+            case '1801645151':
+            return 'Ivan Cavalera';
+            case '1920062735':
+            return 'Kaan Mehmetoğlu';
+            case '1982134575':
+            return 'Jan Crispyn';
+            case '2065838673':
+            return "Patrick O'Connor";
+            case '2101352153':
+            return 'Vaibhav Bhujbal';
+
+            default:
+            return 'In Progress';
+        }
+    };
+
+  return (
+    <ImageBackground style={styles.background} resizeMode="cover">
+      <View style={styles.container}>
+        <View style={styles.containerInner}>
+
+          {/* HEADER */}
+          <View style={styles.flexClass}>
+                <Pressable onPress={() => navigation.navigate('Profile')}>
+                    {/* <Image
+                    source={require('../../images/right_arrow.png')}
+                    style={styles.rightarrowIcon}
+                    /> */}
+    
+                    {/* <Image
+                        source={require('../../images/profile_icon.png')}
+                        style={styles.profileImage}
+                    /> */}
+                    <View style={styles.initialsAvatar}>
+                        <Text style={styles.initialsText}>
+                        {getInitials(firstName, lastName)}
+                        </Text>
+                    </View>
+                </Pressable>
+    
+                <Image
+                    source={require('../../images/syil_logo_black.png')}
+                    style={styles.logoSyil}
+                />
+    
+                <Pressable onPress={() => navigation.navigate('Ticket')}>
+                    <Image
+                    source={require('../../images/ticket.png')}
+                    style={styles.ticketIcon}
+                    />
+                </Pressable>
+            </View>
+
+          {/* TABLE */}
+          <View style={styles.ticketContainer}>
+
+            <View style={styles.tableHeader}>
+              <Text style={[styles.cell, styles.headerText]}>Ticket ID</Text>
+              <Text style={[styles.cell, styles.headerText]}>Subject</Text>
+              <Text style={[styles.cell, styles.headerText]}>Created</Text>
+              <Text style={[styles.cell, styles.headerText]}>Ticket Owner</Text>
+            </View>
+
+            {loading && (
+              <Text style={{ textAlign: 'center', padding: 10 }}>
+                Loading ticket...
+              </Text>
+            )}
+
+            <FlatList
+              //data={tickets}
+              data={tickets.filter(
+                item =>
+                    item.customer_portal === '' || item.customer_portal === ' ' || item.customer_portal === 'False' ||
+                    item.customer_portal === false
+              )}
+              keyExtractor={(item) => item.ticketId}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{
+                paddingBottom: 300,
+                flexDirection: 'column-reverse',
+              }}
+              renderItem={({ item }) => (
+                <Pressable
+                  onPress={() =>
+                    navigation.navigate('ViewTicketDetail', {
+                      ticketId: item.ticketId,
+                      subject: item.subject,
+                    })
+                  }
+                >
+                  <View style={styles.tableRow}>
+                    <Text style={styles.cellID}>#{item.ticketId}</Text>
+                    <Text style={styles.cell}>{item.subject}</Text>
+                    <Text style={styles.cell}>
+                      {formatDate(item.createdDate)}
+                    </Text>
+                    <Text style={styles.cell}>
+                      {getStatusText(item.ownerId)}
+                    </Text>
+                  </View>
+                </Pressable>
+              )}
+            />
+
+            {/* {!loading && tickets.length === 0 && (
+              <Text style={styles.noTicketText}>No tickets found</Text>
+            )} */}
+
+              {!loading &&
+                tickets.filter(item => item.customer_portal === '' || item.customer_portal === ' ' || item.customer_portal === 'False' || item.customer_portal === false).length === 0 && (
+                    <Text style={styles.noTicketText}>No tickets found</Text>
+                )}
+
+          </View>
+        </View>
+      </View>
+
+      {/* FOOTER SAME */}
+      <Footer appSupportTeamMember={appSupportTeamMember} currentRoute={currentRoute} />
+    </ImageBackground>
+  );
+};
+
+export default OwnerTickets;
+
+const styles = StyleSheet.create({
+  background: { flex: 1 },
+  container: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: Platform.OS === 'android' ? 60 : 60,
+    backgroundColor: '#fff',
+  },
+  flexClass: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom:26,
+  },
+  rightarrowIcon: { width: 11.86, height: 21.21 },
+  logoSyil: { width: 87.6, height: 24 },
+  ticketIcon: { width: 26.88, height: 21.88 },
+  initialsAvatar:{width:30,height:30,backgroundColor:'#000',borderRadius:100,justifyContent:'center',alignItems:'center',},
+  initialsText:{fontSize:14,fontWeight:500,color:'#FFEA00'},
+  profileImage:{width:30,height:30,},
+
+
+
+    ticketContainer: {
+        //flex: 1,
+        marginTop: 10,
+    },
+
+    tableHeader: {
+        flexDirection: 'row',
+        paddingVertical: 10,
+        borderBottomWidth: 1,
+        borderColor: '#ddd',
+    },
+
+    tableRow: {
+        flexDirection: 'row',
+        paddingVertical: 14,
+        borderBottomWidth: 1,
+        borderColor: '#f0f0f0',
+    }, 
+
+    cellID:{
+        flex: '0 0 25%',
+        width:'25%',
+        fontSize: 12,
+        color: '#333',
+        padding:5,
+        fontWeight:700,
+    },
+
+    cell: {
+        flex: '0 0 25%',
+        width:'25%',
+        fontSize: 12,
+        color: '#333',
+        padding:5,
+    },
+
+    headerText: {
+        fontWeight: '600',
+        color: '#000',
+    },
+
+    closedStatus: {
+        color: '#2e7d32',
+        fontWeight: '600',
+    },
+
+    noTicketText: {
+        textAlign: 'center',
+        marginTop: 20,
+        color: '#999',
+    },
+
+})

@@ -101,7 +101,7 @@ const More = ({ navigation }) => {
             <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('Chatscreen')} >
                 <View style={styles.left}>
                 <Image source={require('../../images/ArticleIcon.png')} style={styles.icon} />
-                <Text allowFontScaling={false} style={styles.text}>Ask Alex</Text>
+                <Text allowFontScaling={false} style={styles.text}>Chat with SYIL</Text>
                 </View>
                 <Image source={require('../../images/left_arrow.png')} style={styles.Leftarrow} />
             </TouchableOpacity>
@@ -116,39 +116,54 @@ const More = ({ navigation }) => {
             </TouchableOpacity>
 
             {/* Request Quote */}
-            <TouchableOpacity style={styles.row} 
-                    onPress={() => {
-                    const url = 'https://syil.com/contact-us';
-                    Linking.canOpenURL(url)
-                    .then(supported => {
-                        if (supported) {
-                        Linking.openURL(url);
-                        } else {
-                        console.log("Don't know how to open URI: " + url);
-                        }
-                    })
-                    .catch(err => console.error('An error occurred', err));
-                }}>
+            {/* <TouchableOpacity style={styles.row} 
+                //     onPress={() => {
+                //     const url = 'https://syil.com/contact-us';
+                //     Linking.canOpenURL(url)
+                //     .then(supported => {
+                //         if (supported) {
+                //         Linking.openURL(url);
+                //         } else {
+                //         console.log("Don't know how to open URI: " + url);
+                //         }
+                //     })
+                //     .catch(err => console.error('An error occurred', err));
+                // }}
+
+                onPress={() =>
+                        navigation.navigate('WebViewScreen', {
+                        url: 'https://syil.com/contact-us',
+                        })
+                    }
+                >
                 <View style={styles.left}>
                 <Image source={require('../../images/quote.png')} style={styles.icon} />
                 <Text allowFontScaling={false} style={styles.text}>Request Quote</Text>
                 </View>
                 <Image source={require('../../images/left_arrow.png')} style={styles.Leftarrow} />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
 
             {/* Customer Stories */}
-            <TouchableOpacity style={styles.row} onPress={() => {
-                    const url = 'https://syil.com/customer-stories-form';
-                    Linking.canOpenURL(url)
-                    .then(supported => {
-                        if (supported) {
-                        Linking.openURL(url);
-                        } else {
-                        console.log("Don't know how to open URI: " + url);
-                        }
+            <TouchableOpacity style={styles.row} 
+            // onPress={() => {
+            //         const url = 'https://syil.com/customer-stories-form';
+            //         Linking.canOpenURL(url)
+            //         .then(supported => {
+            //             if (supported) {
+            //             Linking.openURL(url);
+            //             } else {
+            //             console.log("Don't know how to open URI: " + url);
+            //             }
+            //         })
+            //         .catch(err => console.error('An error occurred', err));
+            //     }}
+
+            onPress={() =>
+                    navigation.navigate('WebViewScreen', {
+                    url: 'https://syil.com/case-studies',
                     })
-                    .catch(err => console.error('An error occurred', err));
-                }}>
+                }
+                >
                 <View style={styles.left}>
                 <Image source={require('../../images/customer.png')} style={styles.icon} />
                 <Text allowFontScaling={false} style={styles.text}>Customer Stories</Text>
@@ -159,7 +174,7 @@ const More = ({ navigation }) => {
             <TouchableOpacity style={styles.row} onPress={() => navigation.navigate('CustomerNewsListing')} >
                 <View style={styles.left}>
                 <Image source={require('../../images/customer_listing_blog.png')} style={styles.icon} />
-                <Text style={styles.text}>Customer News</Text>
+                <Text allowFontScaling={false} style={styles.text}>Customer News</Text>
                 </View>
                 <Image source={require('../../images/left_arrow.png')} style={styles.Leftarrow} />
             </TouchableOpacity>
@@ -176,18 +191,8 @@ export default More
 
 const styles = StyleSheet.create({
   background: { flex: 1 },
-  container: {
-    flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: Platform.OS === 'android' ? 60 : 60,
-    backgroundColor: '#fff',
-  },
-  flexClass: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom:26,
-  },
+  container: { flex: 1, paddingHorizontal: 16, paddingTop: Platform.OS === 'android' ? 60 : 60, backgroundColor: '#fff', },
+  flexClass: { flexDirection: 'row', justifyContent: 'space-between',alignItems: 'center', marginBottom:26, },
   rightarrowIcon: { width: 11.86, height: 21.21 },
   logoSyil: { width: 87.6, height: 24 },
   ticketIcon: { width: 26.88, height: 21.88 },
@@ -196,34 +201,9 @@ const styles = StyleSheet.create({
   profileImage:{width:30,height:30,},
 
   Leftarrow: { width: 11.86, height: 21.21 },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 18,
-    borderBottomWidth: 1,
-    borderBottomColor: '#fff',
-    backgroundColor:'#F2F2F2'
-  },
-  left: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  icon: {
-    width: 30,
-    height: 30,
-    resizeMode: 'contain',
-    marginRight: 12,
-  },
-  text: {
-    fontSize: 16,
-    color: '#000',
-    fontWeight:500,
-  },
-  arrow: {
-    width: 14,
-    height: 14,
-    tintColor: '#999',
-  },
+  row: { flexDirection: 'row',alignItems: 'center',justifyContent: 'space-between',paddingHorizontal: 16,paddingVertical: 18,borderBottomWidth: 1,borderBottomColor: '#fff',backgroundColor:'#F2F2F2'},
+  left: { flexDirection: 'row',alignItems: 'center',},
+  icon: { width: 30,height: 30,resizeMode: 'contain',marginRight: 12,},
+  text: { fontSize: 16,color: '#000',fontWeight:500,},
+  arrow: { width: 14,height: 14,tintColor: '#999',},
 })

@@ -158,6 +158,8 @@ class RNSBottomTabsProps final : public ViewProps {
 
 #pragma mark - Props
 
+  bool tabBarHidden{false};
+  SharedColor nativeContainerBackgroundColor{};
   SharedColor tabBarBackgroundColor{};
   std::string tabBarItemTitleFontFamily{};
   Float tabBarItemTitleFontSize{0.0};
@@ -175,7 +177,6 @@ class RNSBottomTabsProps final : public ViewProps {
   SharedColor tabBarTintColor{};
   RNSBottomTabsTabBarMinimizeBehavior tabBarMinimizeBehavior{RNSBottomTabsTabBarMinimizeBehavior::Automatic};
   RNSBottomTabsTabBarControllerMode tabBarControllerMode{RNSBottomTabsTabBarControllerMode::Automatic};
-  bool tabBarHidden{false};
   bool controlNavigationStateInJS{false};
 
   #ifdef RN_SERIALIZABLE_STATE
@@ -222,13 +223,14 @@ static inline folly::dynamic toDynamic(const RNSBottomTabsScreenOrientation &val
   return toString(value);
 }
 #endif
-enum class RNSBottomTabsScreenIconType { Image, Template, SfSymbol };
+enum class RNSBottomTabsScreenIconType { Image, Template, SfSymbol, Xcasset };
 
 static inline void fromRawValue(const PropsParserContext& context, const RawValue &value, RNSBottomTabsScreenIconType &result) {
   auto string = (std::string)value;
   if (string == "image") { result = RNSBottomTabsScreenIconType::Image; return; }
   if (string == "template") { result = RNSBottomTabsScreenIconType::Template; return; }
   if (string == "sfSymbol") { result = RNSBottomTabsScreenIconType::SfSymbol; return; }
+  if (string == "xcasset") { result = RNSBottomTabsScreenIconType::Xcasset; return; }
   abort();
 }
 
@@ -237,6 +239,7 @@ static inline std::string toString(const RNSBottomTabsScreenIconType &value) {
     case RNSBottomTabsScreenIconType::Image: return "image";
     case RNSBottomTabsScreenIconType::Template: return "template";
     case RNSBottomTabsScreenIconType::SfSymbol: return "sfSymbol";
+    case RNSBottomTabsScreenIconType::Xcasset: return "xcasset";
   }
 }
 
@@ -496,6 +499,8 @@ class RNSBottomTabsScreenProps final : public ViewProps {
   std::string title{};
   bool isTitleUndefined{true};
   std::string badgeValue{};
+  std::string tabBarItemTestID{};
+  std::string tabBarItemAccessibilityLabel{};
   RNSBottomTabsScreenOrientation orientation{RNSBottomTabsScreenOrientation::Inherit};
   std::string drawableIconResourceName{};
   ImageSource imageIconResource{};
@@ -505,9 +510,9 @@ class RNSBottomTabsScreenProps final : public ViewProps {
   folly::dynamic scrollEdgeAppearance{};
   RNSBottomTabsScreenIconType iconType{RNSBottomTabsScreenIconType::SfSymbol};
   ImageSource iconImageSource{};
-  std::string iconSfSymbolName{};
+  std::string iconResourceName{};
   ImageSource selectedIconImageSource{};
-  std::string selectedIconSfSymbolName{};
+  std::string selectedIconResourceName{};
   RNSBottomTabsScreenSystemItem systemItem{RNSBottomTabsScreenSystemItem::None};
   RNSBottomTabsScreenSpecialEffectsStruct specialEffects{};
   bool overrideScrollViewContentInsetAdjustmentBehavior{true};
@@ -534,24 +539,6 @@ class RNSFullWindowOverlayProps final : public ViewProps {
 #pragma mark - Props
 
   bool accessibilityContainerViewIsModal{true};
-
-  #ifdef RN_SERIALIZABLE_STATE
-  ComponentName getDiffPropsImplementationTarget() const override;
-
-  folly::dynamic getDiffProps(const Props* prevProps) const override;
-  #endif
-
-  
-};
-
-class RNSScreenStackHostProps final : public ViewProps {
- public:
-  RNSScreenStackHostProps() = default;
-  RNSScreenStackHostProps(const PropsParserContext& context, const RNSScreenStackHostProps &sourceProps, const RawProps &rawProps);
-
-#pragma mark - Props
-
-  
 
   #ifdef RN_SERIALIZABLE_STATE
   ComponentName getDiffPropsImplementationTarget() const override;
@@ -880,6 +867,46 @@ class RNSSplitViewScreenProps final : public ViewProps {
   
 };
 
+class RNSStackHostProps final : public ViewProps {
+ public:
+  RNSStackHostProps() = default;
+  RNSStackHostProps(const PropsParserContext& context, const RNSStackHostProps &sourceProps, const RawProps &rawProps);
+
+#pragma mark - Props
+
+  
+
+  #ifdef RN_SERIALIZABLE_STATE
+  ComponentName getDiffPropsImplementationTarget() const override;
+
+  folly::dynamic getDiffProps(const Props* prevProps) const override;
+  #endif
+
+  
+};
+
+enum class RNSStackScreenActivityMode { Detached, Attached };
+
+static inline void fromRawValue(const PropsParserContext& context, const RawValue &value, RNSStackScreenActivityMode &result) {
+  auto string = (std::string)value;
+  if (string == "detached") { result = RNSStackScreenActivityMode::Detached; return; }
+  if (string == "attached") { result = RNSStackScreenActivityMode::Attached; return; }
+  abort();
+}
+
+static inline std::string toString(const RNSStackScreenActivityMode &value) {
+  switch (value) {
+    case RNSStackScreenActivityMode::Detached: return "detached";
+    case RNSStackScreenActivityMode::Attached: return "attached";
+  }
+}
+
+#ifdef RN_SERIALIZABLE_STATE
+static inline folly::dynamic toDynamic(const RNSStackScreenActivityMode &value) {
+  return toString(value);
+}
+#endif
+
 class RNSStackScreenProps final : public ViewProps {
  public:
   RNSStackScreenProps() = default;
@@ -887,7 +914,7 @@ class RNSStackScreenProps final : public ViewProps {
 
 #pragma mark - Props
 
-  int maxLifecycleState{0};
+  RNSStackScreenActivityMode activityMode{RNSStackScreenActivityMode::Detached};
   std::string screenKey{};
 
   #ifdef RN_SERIALIZABLE_STATE
@@ -1103,6 +1130,7 @@ class RNSModalScreenProps final : public ViewProps {
   int sheetInitialDetent{0};
   int sheetElevation{24};
   bool sheetShouldOverflowTopInset{false};
+  bool sheetDefaultResizeAnimationEnabled{true};
   bool customAnimationOnSwipe{false};
   RNSModalScreenFullScreenSwipeEnabled fullScreenSwipeEnabled{RNSModalScreenFullScreenSwipeEnabled::Undefined};
   bool fullScreenSwipeShadowEnabled{true};
@@ -1589,6 +1617,7 @@ class RNSScreenProps final : public ViewProps {
   int sheetInitialDetent{0};
   int sheetElevation{24};
   bool sheetShouldOverflowTopInset{false};
+  bool sheetDefaultResizeAnimationEnabled{true};
   bool customAnimationOnSwipe{false};
   RNSScreenFullScreenSwipeEnabled fullScreenSwipeEnabled{RNSScreenFullScreenSwipeEnabled::Undefined};
   bool fullScreenSwipeShadowEnabled{true};
@@ -1880,7 +1909,7 @@ class RNSScreenStackProps final : public ViewProps {
 
 #pragma mark - Props
 
-  
+  bool iosPreventReattachmentOfDismissedScreens{false};
 
   #ifdef RN_SERIALIZABLE_STATE
   ComponentName getDiffPropsImplementationTarget() const override;

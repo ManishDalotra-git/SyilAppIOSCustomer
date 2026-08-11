@@ -343,49 +343,15 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { padding: 16, paddingBottom: 80 },
   title: { fontSize: 24, fontWeight: '700', marginBottom: 10 },
-  metaContainer: {
-    marginBottom: 16,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    marginBottom: 10,
-  },
-  metaText: {
-    fontSize: 14,
-    color: '#555',
-  },
-  metaValue: {
-    fontWeight: '600',
-    color: '#000',
-  },
-  tocWrapper: {
-    backgroundColor: '#ffe600',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 16,
-    display:'none',
-  },
-  tocTitle: {
-    fontWeight: '700',
-    marginBottom: 8,
-  },
-  tocDropdown: {
-    backgroundColor: '#fff',
-    padding: 10,
-    borderRadius: 6,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  tocPlaceholder: {
-    color: '#555',
-  },
-  tocItem: {
-    paddingVertical: 8,
-  },
+  metaContainer: { marginBottom: 16, paddingBottom: 12, borderBottomWidth: 1, borderColor: '#e0e0e0', },
+  title: { fontSize: 24, fontWeight: '700', marginBottom: 10, },
+  metaText: { fontSize: 14, color: '#555', },
+  metaValue: { fontWeight: '600', color: '#000', },
+  tocWrapper: { backgroundColor: '#ffe600', padding: 12, borderRadius: 8, marginBottom: 16, display:'none', },
+  tocTitle: { fontWeight: '700', marginBottom: 8, },
+  tocDropdown: { backgroundColor: '#fff', padding: 10, borderRadius: 6, flexDirection: 'row', justifyContent: 'space-between', },
+  tocPlaceholder: { color: '#555', },
+  tocItem: { paddingVertical: 8, },
 });
 
 const htmlStyles = {

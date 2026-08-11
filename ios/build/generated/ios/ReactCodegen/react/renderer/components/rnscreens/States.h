@@ -19,9 +19,9 @@ using RNSBottomTabsAccessoryContentState = StateData;
 
 using RNSBottomTabsScreenState = StateData;
 
-using RNSScreenStackHostState = StateData;
-
 using RNSSplitViewHostState = StateData;
+
+using RNSStackHostState = StateData;
 
 using RNSStackScreenState = StateData;
 

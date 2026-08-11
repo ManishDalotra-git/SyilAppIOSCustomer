@@ -83,7 +83,7 @@ useEffect(() => {
   const fetchArticles = async () => {
     try {
       const response = await fetch(
-        'https://syilapp-w8ye.onrender.com/articles'
+        'https://syilappcustomer.onrender.com/articles'
       );
       const data = await response.json();
 
@@ -366,18 +366,8 @@ export default KnowledgeBase;
 
 const styles = StyleSheet.create({
   background: { flex: 1 },
-  container: {
-    flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: Platform.OS === 'android' ? 60 : 60,
-    backgroundColor: '#fff',
-  },
-  containerInner: {},
-  flexClass: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
+  container: { flex: 1, paddingHorizontal: 16, paddingTop: Platform.OS === 'android' ? 60 : 60, backgroundColor: '#fff', },
+  flexClass: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', },
   rightarrowIcon: { width: 11.86, height: 21.21 },
   logoSyil: { width: 87.6, height: 24 },
   ticketIcon: { width: 26.88, height: 21.88 },
@@ -385,93 +375,28 @@ const styles = StyleSheet.create({
   initialsText:{fontSize:14,fontWeight:500,color:'#FFEA00'},
   profileImage:{width:30,height:30,},
 
-
   categoryRow: { marginTop: 15, height: 100 },
-  activeCategory: {
-    backgroundColor: '#FFEA00',
-    padding: 10,
-    borderRadius: 10,
-    height: 96,
-  },
-  categoryCardBase: {
-    alignItems: 'center',
-    padding: 10,
-    borderRadius: 10,
-    width: 90,
-    marginRight: 10,
-    borderWidth: 1,
-    borderColor: '#F5F5F7',
-    backgroundColor: '#fff',
-    height: 96,
-  },
+  activeCategory: { backgroundColor: '#FFEA00', padding: 10, borderRadius: 10, height: 96, },
+  categoryCardBase: { alignItems: 'center', padding: 10, borderRadius: 10, width: 90, marginRight: 10, borderWidth: 1, borderColor: '#F5F5F7', backgroundColor: '#fff', height: 96, },
   categoryIcon: { width: 41, height: 41, marginBottom: 6 },
   categoryText: { fontSize: 12, textAlign: 'center' },
-
   popularTitle: { fontSize: 20, fontWeight: '700', marginVertical: 10 },
-
   articleListWrapper: { backgroundColor: '#F5F5F7', marginTop: 10 },
   articleListContent: { paddingTop: 10, paddingBottom: 30 },
 
-  articleCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderColor: '#FFF',
-  },
+  articleCard: { flexDirection: 'row', alignItems: 'center', padding: 16, borderBottomWidth: 1, borderColor: '#FFF', },
   articleIcon: { width: 41, height: 41, marginRight: 8 },
   Leftarrow: { width: 11.86, height: 21.21, marginLeft: 16 },
   articleTitle: { fontSize: 14, fontWeight: '600', color: '#000' },
   articleSub: { fontSize: 12, color: '#777' },
 
-  loaderContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  searchBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F5F5F7',
-    marginTop: 26,
-    borderRadius: 25,
-    height: 45,
-  },
-  searchIcon: {
-    width: 18,
-    height: 18,
-    marginHorizontal: 16,
-    tintColor: '#777',
-  },
+  loaderContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', },
+  searchBox: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F5F5F7', marginTop: 26, borderRadius: 25, height: 45, },
+  searchIcon: { width: 18, height: 18, marginHorizontal: 16, tintColor: '#777', },
   searchInput: { flex: 1, fontSize: 14, color: '#000' },
-
-
-  tabContainer: {
-  flexDirection: 'row',
-  marginTop: 10,
-  marginBottom: 5,
-},
-
-tabButton: {
-  flex: 1,
-  paddingVertical: 10,
-  borderBottomWidth: 2,
-  borderBottomColor: 'transparent',
-  alignItems: 'center',
-},
-
-activeTab: {
-  borderBottomColor: '#FFEA00',
-},
-
-tabText: {
-  fontSize: 14,
-  color: '#777',
-},
-
-activeTabText: {
-  color: '#000',
-  fontWeight: '600',
-},
+  tabContainer: { flexDirection: 'row', marginTop: 10, marginBottom: 5, },
+  tabButton: { flex: 1, paddingVertical: 10, borderBottomWidth: 2, borderBottomColor: 'transparent', alignItems: 'center', },
+  activeTab: { borderBottomColor: '#FFEA00', },
+  tabText: { fontSize: 14, color: '#777', },
+  activeTabText: { color: '#000', fontWeight: '600', },
 });

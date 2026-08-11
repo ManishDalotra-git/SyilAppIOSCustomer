@@ -150,50 +150,16 @@ export default UploadArticle;
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#fff' },
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 16,
-    paddingTop: Platform.OS === 'android' ? 60 : 20,
-  },
-
-
+  container: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 16, paddingTop: Platform.OS === 'android' ? 60 : 20, },
   arrowIcon: { width: 32, height: 32 },
   header: { width: '100%', flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, height: 60, backgroundColor: '#fff' },
   backButton: { marginRight: 0 },
   headerTitle: { fontSize: 24, fontWeight: '700', textAlign: 'center', width: '82%', },
 
-
-  title: {
-    fontSize: 22,
-    fontWeight: '700',
-    marginBottom: 24,
-  },
-  button: {
-    backgroundColor: '#007bff',
-    paddingVertical: 12,
-    paddingHorizontal: 28,
-    borderRadius: 8,
-    marginTop: 12,
-  },
-  greenButton: {
-    backgroundColor: '#28a745',
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  fileInfo: {
-    marginTop: 12,
-    fontSize: 14,
-    color: '#333',
-  },
-  note: {
-    marginTop: 24,
-    fontSize: 12,
-    color: '#555',
-    textAlign: 'center',
-  },
+  title: { fontSize: 22, fontWeight: '700', marginBottom: 24, },
+  button: { backgroundColor: '#007bff', paddingVertical: 12, paddingHorizontal: 28, borderRadius: 8, marginTop: 12, },
+  greenButton: { backgroundColor: '#28a745', },
+  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600', },
+  fileInfo: { marginTop: 12, fontSize: 14, color: '#333', },
+  note: { marginTop: 24, fontSize: 12, color: '#555', textAlign: 'center', },
 });

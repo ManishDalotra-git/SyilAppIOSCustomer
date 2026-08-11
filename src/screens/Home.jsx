@@ -146,7 +146,7 @@ useFocusEffect(
 
       <Text allowFontScaling={false} style={styles.welcome} >Customer Portal</Text>
 
-      <Pressable onPress={() => navigation.navigate('KnowledgeBase')} style={styles.card}>
+      {/* <Pressable onPress={() => navigation.navigate('KnowledgeBase')} style={styles.card}>
         <View style={styles.cardFlex} >
           <Image style={styles.cardImage} source={require('../../images/knowledge-base.png')} /> 
           <Image style={styles.arrow} source={require('../../images/arrow.png')} /> 
@@ -172,7 +172,69 @@ useFocusEffect(
             Submit a support ticket and get a fast response.
           </Text>
         </View>
-      </Pressable>
+      </Pressable> */}
+
+      <View style={styles.fourCardsRow}>
+        <Pressable onPress={() => navigation.navigate('KnowledgeBase')} style={styles.fourCardsRowCard}>
+          <View style={styles.fourCardsRowFlex} >
+            <Image style={styles.fourCardsRowImage} source={require('../../images/kb_icon_x4.png')} /> 
+          </View>
+
+          <View style={styles.fourCardsRowContent}>
+            <Text allowFontScaling={false} style={styles.fourCardsRowTitle}>Knowledge Base</Text>
+          </View>
+        </Pressable>
+
+        <Pressable onPress={() => navigation.navigate('Ticket')} style={styles.fourCardsRowCard}>
+          <View style={styles.fourCardsRowFlex} >
+            <Image style={styles.fourCardsRowImage} source={require('../../images/create_ticket_x4.png')} /> 
+          </View>
+
+          <View style={styles.fourCardsRowContent}>
+            <Text allowFontScaling={false} style={styles.fourCardsRowTitle}>Create Ticket</Text>
+          </View>
+        </Pressable>
+
+        <Pressable onPress={() => navigation.navigate('ViewTicket')} style={styles.fourCardsRowCard}>
+          <View style={styles.fourCardsRowFlex} >
+            <Image style={styles.fourCardsRowImage} source={require('../../images/view_ticket_x4.png')} /> 
+          </View>
+
+          <View style={styles.fourCardsRowContent}>
+            <Text allowFontScaling={false} style={styles.fourCardsRowTitle}>View Ticket</Text>
+          </View>
+        </Pressable>
+
+        <Pressable onPress={()  => navigation.navigate('Chatscreen')} style={styles.fourCardsRowCard}>
+          <View style={styles.fourCardsRowFlex} >
+            <Image style={styles.fourCardsRowImage} source={require('../../images/Chat_ai_x4.png')} /> 
+          </View>
+
+          <View style={styles.fourCardsRowContent}>
+            <Text allowFontScaling={false} style={styles.fourCardsRowTitle}>Chat With Alex</Text>
+          </View>
+        </Pressable>
+      </View>
+
+      <View style={styles.bottomButtonCard}>
+        <Pressable onPress={() => navigation.navigate('CustomerNewsListing')} style={styles.bottomButton}>
+          <View style={styles.bottomButtonCardFlex} >
+            <Text allowFontScaling={false} style={styles.bottomButtonCardTitle}>Customer News</Text>
+          </View>
+        </Pressable>
+
+        <Pressable 
+        onPress={() =>
+                    navigation.navigate('WebViewScreen', {
+                    url: 'https://syil.com/case-studies',
+                    })
+                }
+        style={styles.bottomButton}>
+          <View style={styles.bottomButtonCardFlex} >
+            <Text allowFontScaling={false} style={styles.bottomButtonCardTitle}>Customer Stories</Text>
+          </View>
+        </Pressable>
+      </View>
 
       </ScrollView>
 
@@ -185,113 +247,63 @@ useFocusEffect(
 export default Home
 
 const styles = StyleSheet.create({
-  background: {  
-    flex:1, 
+  background: {  flex:1,  },
+  container: { flexGrow: 1, justifyContent: 'flex-start', paddingHorizontal: 16, paddingTop: Platform.OS === 'android' ? 60 : 60, paddingBottom: 150, },
+  heightAuto:{ alignItems: 'center', paddingBottom: 40, height:'100%', },
+  logo: { width: 120, height: 50, resizeMode: 'contain', marginTop: 0, alignSelf: 'center', marginLeft: 0, marginVertical:'auto', justifyContent:'center', },
+  welcome: { color: '#fff', fontSize: 32, fontWeight: '700', marginBottom: 20, marginTop: 40, textAlign:'center' },
+  card: { backgroundColor: '#fff', borderRadius: 20, padding: 25, marginBottom: 22, height:'auto', minHeight:185, },
+  cardImage:{ width:50, height:50, },
+  cardFlex:{ display:'flex', flexWrap:'nowrap', flexDirection:'row', justifyContent:'space-between', alignItems:'center' },
+  cardTitle: { fontSize: 20, fontWeight: '700', marginBottom: 4, marginTop:10 },
+  cardDesc: { fontSize: 16, color: '#000', },
+  arrow: { fontSize: 26, color: '#000', marginLeft: 10, width: 38, height: 38,},
+  headerRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', },
+  bellWrapper: { position: 'absolute', top: 4, right: 0, },
+  bellIcon: { width: 36, height: 36, },
+  badge: { position: 'absolute', top: 3, right: 3, backgroundColor: 'red', borderRadius: 10, minWidth: 18, height: 18, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 4, },
+  badgeText: { color: '#fff',fontSize: 8,fontWeight: '700',},
+
+  fourCardsRow: {
+    display: 'flex',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginTop: 20,
   },
-  container: {
-    flexGrow: 1,
-    justifyContent: 'flex-start',
-    paddingHorizontal: 16,
-    paddingTop: Platform.OS === 'android' ? 60 : 60,
-    paddingBottom: 150,
-  },
-  heightAuto:{
-    alignItems: 'center',
-    paddingBottom: 40,
-    height:'100%',
-  },
-  logo: {
-    width: 120,
-    height: 50,
-    resizeMode: 'contain',
-    marginTop: 0,
-    alignSelf: 'center',
-    marginLeft: 0,
-    marginVertical:'auto',
-    justifyContent:'center',
-  },
-  welcome: {
-    color: '#fff',
-    fontSize: 32,
-    fontWeight: '700',
-    marginBottom: 20,
-    marginTop: 40,
-    textAlign:'center'
-  },
-  card: {
+  fourCardsRowCard: {
     backgroundColor: '#fff',
-    borderRadius: 20,
+    borderRadius: 10,
     padding: 25,
-    marginBottom: 22,
-    height:'auto',
-    minHeight:185,
+    flexBasis: '47%',
+    maxWidth: '47%',
+    width: '47%',
+    marginBottom: 20,
   },
-  cardImage:{
-    width:50,
-    height:50,
+  fourCardsRowFlex: {
+    alignItems: 'center',
   },
-  cardFlex:{
-    display:'flex',
-    flexWrap:'nowrap',
-    flexDirection:'row',
-    justifyContent:'space-between',
-    alignItems:'center'
+  fourCardsRowImage: {
+    width: 50,
+    height: 50,
   },
-  cardTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    marginBottom: 4,
-    marginTop:10
-  },
-  cardDesc: {
+  fourCardsRowTitle: {
+    color: '#000',
     fontSize: 16,
-    color: '#000',
+    fontWeight: '500',
+    marginTop: 10,
+    textAlign: 'center',
   },
-  arrow: {
-    fontSize: 26,
-    color: '#000',
-    marginLeft: 10,
-    width: 38,
-    height: 38,
+  bottomButton:{
+    backgroundColor:'#FFEA00',
+    borderRadius:100,
+    padding:15,
+    alignItems:'center',
+    marginBottom:20,
   },
-
-
-  headerRow: {
-  flexDirection: 'row',
-  justifyContent: 'center',
-  alignItems: 'center',
-},
-
-bellWrapper: {
-  position: 'absolute',
-  top: 4,
-  right: 0,
-},
-
-bellIcon: {
-  width: 36,
-  height: 36,
-},
-
-badge: {
-  position: 'absolute',
-  top: 3,
-  right: 3,
-  backgroundColor: 'red',
-  borderRadius: 10,
-  minWidth: 18,
-  height: 18,
-  justifyContent: 'center',
-  alignItems: 'center',
-  paddingHorizontal: 4,
-},
-
-badgeText: {
-  color: '#fff',
-  fontSize: 8,
-  fontWeight: '700',
-},
-
-
-  
+  bottomButtonCardTitle:{
+    fontSize: 20,
+    fontWeight: '500',
+    Color:'#000',
+  },
 })

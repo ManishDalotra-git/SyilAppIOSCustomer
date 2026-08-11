@@ -92,13 +92,6 @@ class RNSFullWindowOverlayEventEmitter : public ViewEventEmitter {
   
   
 };
-class RNSScreenStackHostEventEmitter : public ViewEventEmitter {
- public:
-  using ViewEventEmitter::ViewEventEmitter;
-
-  
-  
-};
 class RNSSplitViewHostEventEmitter : public ViewEventEmitter {
  public:
   using ViewEventEmitter::ViewEventEmitter;
@@ -154,6 +147,13 @@ class RNSSplitViewScreenEventEmitter : public ViewEventEmitter {
 
   void onDidDisappear(OnDidDisappear value) const;
 };
+class RNSStackHostEventEmitter : public ViewEventEmitter {
+ public:
+  using ViewEventEmitter::ViewEventEmitter;
+
+  
+  
+};
 class RNSStackScreenEventEmitter : public ViewEventEmitter {
  public:
   using ViewEventEmitter::ViewEventEmitter;
@@ -173,6 +173,10 @@ class RNSStackScreenEventEmitter : public ViewEventEmitter {
   struct OnDidDisappear {
       
     };
+
+  struct OnDismiss {
+      bool isNativeDismiss;
+    };
   void onWillAppear(OnWillAppear value) const;
 
   void onDidAppear(OnDidAppear value) const;
@@ -180,6 +184,8 @@ class RNSStackScreenEventEmitter : public ViewEventEmitter {
   void onWillDisappear(OnWillDisappear value) const;
 
   void onDidDisappear(OnDidDisappear value) const;
+
+  void onDismiss(OnDismiss value) const;
 };
 class RNSModalScreenEventEmitter : public ViewEventEmitter {
  public:

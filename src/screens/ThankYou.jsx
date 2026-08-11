@@ -51,72 +51,15 @@ const { ticketId } = route.params || {};
 export default ThankYou;
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    backgroundColor:'#fff' ,
-  },
-  container: {
-    flexGrow: 1,
-    justifyContent: 'flex-start',
-    paddingHorizontal: 16,
-    paddingTop: Platform.OS === 'android' ? 60 : 50,
-    paddingBottom: 30,
-  },
-  flexClass:{
-    display:'flex',
-    flexDirection:'row',
-    alignItems:'center',
-    justifyContent:'space-between',
-    paddingHorizontal:0,
-    paddingVertical:16,
-    marginHorizontal:0,
-    boxShadow:'0px 0px 0px 0px #ccccccff',
-    marginBottom:30,
-  },
-  labelText:{
-    fontSize:24,
-    fontWeight:700,
-    textAlign:'center'
-  },
-  arrowIcon:{
-    width:32,
-    height:32,
-  },
-  logo:{
-    textAlign:'center',
-    marginHorizontal: 'auto'
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    marginBottom: 16,
-    textAlign:'center',
-    marginTop:16,
-  },
-  text: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 30,
-    textAlign:'center'
-  },
-  ticketId:{
-    backgroundColor: '#F5F5F7',
-    padding:16,
-    width:'100%',
-    borderRadius:8,
-    fontSize:16
-  },
-  card: {
-    backgroundColor: '#FFEA00',
-    padding: 15,
-    borderRadius: 100,
-    width: '100%',
-    marginTop:45,
-  },
-  buttonText: {
-    color: '#000',
-    fontWeight: 'bold',
-    fontSize: 20,
-    textAlign:'center'
-  },
+  background: { flex: 1, backgroundColor:'#fff' , },
+  container: { flexGrow: 1, justifyContent: 'flex-start', paddingHorizontal: 16, paddingTop: Platform.OS === 'android' ? 60 : 50, paddingBottom: 30, },
+  flexClass:{ display:'flex', flexDirection:'row', alignItems:'center', justifyContent:'space-between', paddingHorizontal:0, paddingVertical:16, marginHorizontal:0, boxShadow:'0px 0px 0px 0px #ccccccff', marginBottom:30, },
+  labelText:{ fontSize:24, fontWeight:700, textAlign:'center' },
+  arrowIcon:{ width:32, height:32, },
+  logo:{ textAlign:'center', marginHorizontal: 'auto' },
+  title: { fontSize: 32, fontWeight: 'bold', marginBottom: 16, textAlign:'center', marginTop:16, },
+  text: { fontSize: 16, textAlign: 'center', marginBottom: 30, textAlign:'center' },
+  ticketId:{ backgroundColor: '#F5F5F7', padding:16, width:'100%', borderRadius:8, fontSize:16 },
+  card: { backgroundColor: '#FFEA00', padding: 15, borderRadius: 100, width: '100%', marginTop:45, },
+  buttonText: { color: '#000', fontWeight: 'bold', fontSize: 20, textAlign:'center' },
 });

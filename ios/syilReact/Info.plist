@@ -30,6 +30,12 @@
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSLocalNetworkUsageDescription</key>
+<string>This app needs local network access to connect to Metro bundler.</string>
+<key>NSAllowsArbitraryLoadsInLocalNetworking</key>
+<true/>
+	<key>MetroServerHost</key>
+	<string>192.168.0.126</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>

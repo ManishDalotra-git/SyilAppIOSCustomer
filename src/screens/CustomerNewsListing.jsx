@@ -186,8 +186,8 @@ const CustomerNewsListing = ({ navigation }) => {
         />
       ) : (
         <FlatList
-          data={filteredNews}
-          //data={filteredNews.filter(item => item.currentState === 'PUBLISHED')}
+          //data={filteredNews}
+          data={filteredNews.filter(item => item.currentState === 'PUBLISHED')}
           renderItem={renderItem}
           keyExtractor={(item) => item.id.toString()}
           numColumns={2}
@@ -217,72 +217,18 @@ const CustomerNewsListing = ({ navigation }) => {
 export default CustomerNewsListing;
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    paddingTop: Platform.OS === 'android' ? 40 : 20,
-  },
-
+  background: { flex: 1, },
+  container: { flex: 1, backgroundColor: '#fff', paddingTop: Platform.OS === 'android' ? 40 : 40, },
   header: { height: 65, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16 },
   arrowIcon: { width: 32, height: 32, },
   headerTitle: { fontSize: 24, fontWeight: '700', textAlign: 'center', width: '82%' },
-
   containerInner: { paddingHorizontal: 16,},
-
-  searchBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F5F5F7',
-    marginTop: 0,
-    marginBottom: 20,
-    borderRadius: 25,
-    height: 45,
-  },
-  searchIcon: {
-    width: 18,
-    height: 18,
-    marginHorizontal: 16,
-    tintColor: '#777',
-  },
+  searchBox: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#F5F5F7', marginTop: 0, marginBottom: 20, borderRadius: 25, height: 45, },
+  searchIcon: { width: 18, height: 18, marginHorizontal: 16, tintColor: '#777', },
   searchInput: { flex: 1, fontSize: 14, color: '#000' },
-
-
-  heading: {
-    fontSize: 24,
-    fontWeight: '700',
-    marginBottom: 20,
-    marginTop: 20,
-  },
-
-  card: {
-    width: '48%',
-    marginBottom: 16,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 10,
-    overflow: 'hidden',
-  },
-
-  image: {
-    width: '100%',
-    height: 150,
-  },
-
-  date: {
-    fontSize: 12,
-    color: '#777',
-    paddingHorizontal: 10,
-    paddingTop: 10,
-  },
-
-  title: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000',
-    paddingHorizontal: 10,
-    paddingBottom: 12,
-    paddingTop: 4,
-  },
+  heading: { fontSize: 24, fontWeight: '700', marginBottom: 20, marginTop: 20, },
+  card: { width: '48%', marginBottom: 16, backgroundColor: '#f5f5f5', borderRadius: 10, overflow: 'hidden', },
+  image: { width: '100%', height: 150, },
+  date: { fontSize: 12, color: '#777', paddingHorizontal: 10, paddingTop: 10, },
+  title: { fontSize: 16, fontWeight: '600', color: '#000', paddingHorizontal: 10, paddingBottom: 12, paddingTop: 4, },
 });

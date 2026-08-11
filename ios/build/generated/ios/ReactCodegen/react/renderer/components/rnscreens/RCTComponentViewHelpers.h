@@ -33,15 +33,15 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-@protocol RCTRNSScreenStackHostViewProtocol <NSObject>
-
-@end
-
 @protocol RCTRNSSplitViewHostViewProtocol <NSObject>
 
 @end
 
 @protocol RCTRNSSplitViewScreenViewProtocol <NSObject>
+
+@end
+
+@protocol RCTRNSStackHostViewProtocol <NSObject>
 
 @end
 

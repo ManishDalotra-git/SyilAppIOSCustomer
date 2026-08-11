@@ -18,8 +18,8 @@ void rnscreens_registerComponentDescriptorsFromCodegen(
   std::shared_ptr<const ComponentDescriptorProviderRegistry> registry) {
 registry->add(concreteComponentDescriptorProvider<RNSBottomTabsAccessoryContentComponentDescriptor>());
 registry->add(concreteComponentDescriptorProvider<RNSBottomTabsScreenComponentDescriptor>());
-registry->add(concreteComponentDescriptorProvider<RNSScreenStackHostComponentDescriptor>());
 registry->add(concreteComponentDescriptorProvider<RNSSplitViewHostComponentDescriptor>());
+registry->add(concreteComponentDescriptorProvider<RNSStackHostComponentDescriptor>());
 registry->add(concreteComponentDescriptorProvider<RNSStackScreenComponentDescriptor>());
 registry->add(concreteComponentDescriptorProvider<RNSScreenContainerComponentDescriptor>());
 registry->add(concreteComponentDescriptorProvider<RNSScreenContentWrapperComponentDescriptor>());

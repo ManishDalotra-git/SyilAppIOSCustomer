@@ -289,7 +289,7 @@ const formatCategoryLabel = (key) => {
       
       <View style={styles.containerStyle}>
       <Text allowFontScaling={false} style={styles.label}>Your Email <Text allowFontScaling={false} style={styles.errorColor}>*</Text></Text>
-      <Text allowFontScaling={false} >Enter the email of the partner contact person creating the ticket</Text>
+      {/* <Text allowFontScaling={false} >Enter the email of the partner contact person creating the ticket</Text> */}
       <TextInput
       allowFontScaling={false}
         style={[
@@ -388,14 +388,14 @@ const formatCategoryLabel = (key) => {
         onChangeText={setSerialNo}
       />
 
-      <Text allowFontScaling={false} style={styles.label}>Sales Order Number</Text>
+      {/* <Text allowFontScaling={false} style={styles.label}>Sales Order Number</Text>
       <TextInput
       allowFontScaling={false}
         style={styles.input}
         value={salesOrder}
         onChangeText={setSalesOrder}
         
-      />
+      /> */}
       <Text allowFontScaling={false} style={styles.label}>Category</Text>
 
       {Object.keys(categories).map(key => (
@@ -571,171 +571,35 @@ const formatCategoryLabel = (key) => {
 export default Ticket;
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  arrowIcon:{
-    width:32,
-    height:32,
-  },
-  header: {
-    width: '100%',
-    backgroundColor: '#fff',
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    zIndex: 10,
-  },
-  backButton: {
-    marginRight: 5,
-  },
-  backArrow: {
-    fontSize: 24,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    textAlign:'center',
-    width:'78%',
-  },
-
-  background: {
-    flex: 1,
-  },
-  container: {
-    flexGrow: 1,
-    justifyContent: 'flex-start',
-    paddingHorizontal: 16,
-    paddingTop: Platform.OS === 'android' ? 20 : 20,
-    paddingBottom: 30,
-  },
-  flexClass:{
-    display:'flex',
-    flexDirection:'row',
-    alignItems:'center',
-    justifyContent:'space-between',
-    paddingHorizontal:0,
-    paddingVertical:16,
-    marginHorizontal:0,
-    boxShadow:'0px 0px 0px 0px #ccccccff',
-    marginBottom:10,
-  },
-  labelText:{
-    fontSize:24,
-    fontWeight:700,
-    textAlign:'center'
-  },
-  arrowIcon:{
-    width:32,
-    height:32,
-  },
-  checkboxStyle: {
-    border:1,
-    borderColor:'#000',
-  },
-  label: {
-    marginTop: 12,
-    fontWeight: '600',
-    fontSize:20,
-  },
-  input: {
-    borderRadius: 6,
-    padding: 15,
-    marginTop: 6,
-    backgroundColor:'#F5F5F7',
-  },
-  inputEmail:{
-    borderRadius: 6,
-    padding: 15,
-    marginTop: 6,
-    backgroundColor:'#F5F5F7',
-    textTransform:'lowercase',
-  },
-  textArea: {
-    height: 100,
-    textAlignVertical: 'top',
-  },
-  pickerWrapper: {
-    borderWidth: 0,
-    borderRadius: 6,
-    marginTop: 6,
-    overflow: 'hidden',
-    backgroundColor:'#F5F5F7',
-    paddingLeft:7,
-    paddingRight: 7,
-  },
-  picker: {
-    fontSize:14,
-    paddingLeft:15,
-    paddingRight: 15,
-  },
-  pickerItems: {
-    fontSize:14,
-    paddingLeft:15,
-    paddingRight: 15,
-  },
-  checkboxRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 6,
-    marginRight:0,
-    
-  },
-  checkboxText: {
-    marginLeft: 0,
-    marginRight:0
-  },
-  button: {
-    backgroundColor: '#FFEA00',
-    padding: 14,
-    borderRadius: 100,
-    marginTop: 20,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  uploadText: {
-    backgroundColor: '#F5F5F7',
-    width: 'auto',
-    color: '#000',
-    textAlign:'center',
-    padding: 15,
-    borderRadius:6,
-    marginTop:6,
-    marginBottom:6,
-    fontWeight:600
-  },
-  errorText: {
-    color: 'red',
-    fontSize: 12,
-    marginTop: 4,
-  },
-  errorInput: {
-    borderWidth: 1,
-    borderColor: 'red',
-  },
-  disabledButton: {
-    opacity: 0.6,
-  },
-  buttonText:{
-    color:'#000',
-    fontSize:20,
-    fontWeight:700,
-  },
-    loadingContainer: {
-    flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.78)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingGif: {
-    width: 150,
-    height: 150,
-  },
-  errorColor: {
-    color:'red'
-  }
+  safeArea: { flex: 1, backgroundColor: '#fff', },
+  arrowIcon:{ width:32, height:32, },
+  header: { width: '100%', backgroundColor: '#fff', flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, zIndex: 10, },
+  backButton: { marginRight: 5, },
+  backArrow: { fontSize: 24, },
+  headerTitle: { fontSize: 24, fontWeight: '700', textAlign:'center', width:'78%', },
+  background: { flex: 1, },
+  container: { flexGrow: 1,justifyContent: 'flex-start', paddingHorizontal: 16,paddingTop: Platform.OS === 'android' ? 20 : 20, paddingBottom: 30, },
+  flexClass:{ display:'flex', flexDirection:'row', alignItems:'center', justifyContent:'space-between', paddingHorizontal:0, paddingVertical:16, marginHorizontal:0, boxShadow:'0px 0px 0px 0px #ccccccff', marginBottom:10, },
+  labelText:{ fontSize:24, fontWeight:700, textAlign:'center' },
+  arrowIcon:{ width:32, height:32, },
+  checkboxStyle: { border:1, borderColor:'#000', },
+  label: { marginTop: 12, fontWeight: '600', fontSize:20, },
+  input: { borderRadius: 6, padding: 15, marginTop: 6, backgroundColor:'#F5F5F7', },
+  inputEmail:{ borderRadius: 6, padding: 15, marginTop: 6, backgroundColor:'#F5F5F7', textTransform:'lowercase', },
+  textArea: { height: 100, textAlignVertical: 'top', },
+  pickerWrapper: { borderWidth: 0, borderRadius: 6, marginTop: 6, overflow: 'hidden', backgroundColor:'#F5F5F7', paddingLeft:7, paddingRight: 7, },
+  picker: { fontSize:14, paddingLeft:15, paddingRight: 15,},
+  pickerItems: { fontSize:14, paddingLeft:15, paddingRight: 15, },
+  checkboxRow: { flexDirection: 'row', alignItems: 'center', marginTop: 6, marginRight:0, },
+  checkboxText: { marginLeft: 0, marginRight:0 },
+  button: { backgroundColor: '#FFEA00', padding: 14, borderRadius: 100, marginTop: 20, alignItems: 'center', },
+  buttonText: { color: '#fff', fontWeight: 'bold', },
+  uploadText: { backgroundColor: '#F5F5F7', width: 'auto', color: '#000', textAlign:'center', padding: 15, borderRadius:6, marginTop:6, marginBottom:6, fontWeight:600 },
+  errorText: { color: 'red', fontSize: 12, marginTop: 4, },
+  errorInput: { borderWidth: 1, borderColor: 'red', },
+  disabledButton: { opacity: 0.6, },
+  buttonText:{ color:'#000', fontSize:20, fontWeight:700,},
+  loadingContainer: { flex: 1, backgroundColor: 'rgba(255, 255, 255, 0.78)', justifyContent: 'center', alignItems: 'center', },
+  loadingGif: { width: 150, height: 150, },
+  errorColor: { color:'red' },
 });

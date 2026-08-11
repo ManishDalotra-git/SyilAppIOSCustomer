@@ -343,21 +343,17 @@ export default Profile;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff', paddingTop: Platform.OS === 'android' ? 40 : 45 },
-
   header: { height: 65, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16 },
   arrowIcon: { width: 32, height: 32 },
   headerTitle: { fontSize: 24, fontWeight: '700', textAlign: 'center', width: '84%' },
-
   profileSection: { alignItems: 'center', marginTop: 20 },
   initialsAvatar:{width:104,height:104,backgroundColor:'#000',borderRadius:104,justifyContent:'center', alignItems:'center',position:'relative,'},
   initialsText:{color:'#FFEA00',fontSize:36,fontWeight:'700',},
   avatarWrapper: { position: 'relative', marginBottom: 16, textAlign:'center', justifyContent:'center', alignItems:'center' },
   avatar: { position:'absolute', bottom:0, right:0 },
   avatarIcon: { width: 29, height: 29 },
-
   name: { fontSize: 18, fontWeight: '600', color: '#000' },
   email: { fontSize: 14, color: '#666', marginTop: 4 },
-
   logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFEA00', marginHorizontal: 24, borderRadius: 30, paddingVertical: 14, position: 'absolute', bottom: 40, left: 0, right: 0 },
   logoutIcon: { width: 18, height: 18, marginRight: 8 },
   logoutText: { fontSize: 16, fontWeight: '600', color: '#000' },
@@ -369,12 +365,9 @@ const styles = StyleSheet.create({
   input: { borderWidth: 1, borderColor:'#ccc', borderRadius: 8, paddingHorizontal: 10, height: 45 },
   fieldIcon: { width: 20, height: 20, marginRight:5, },
   iconText:{flexDirection:'row',display:'flex'}, 
-
   saveBtn: { backgroundColor:'#FFEA00', borderRadius:30, paddingVertical:12, marginTop:10, alignItems:'center' },
   saveText: { fontSize:16, fontWeight:'600', color:'#000' },
-
   saveBtnCancel: { backgroundColor:'#000', borderRadius:30, paddingVertical:12, marginTop:10, alignItems:'center' },
   saveTextCancel: { fontSize:16, fontWeight:'600', color:'#FFEA00' },
-
   loadingContainer: { flex:1, justifyContent:'center', alignItems:'center', backgroundColor:'rgba(255, 255, 255, 0.78)' },
 });

@@ -40,17 +40,6 @@ using RNSBottomTabsScreenShadowNode = ConcreteViewShadowNode<
     RNSBottomTabsScreenEventEmitter,
     RNSBottomTabsScreenState>;
 
-JSI_EXPORT extern const char RNSScreenStackHostComponentName[];
-
-/*
- * `ShadowNode` for <RNSScreenStackHost> component.
- */
-using RNSScreenStackHostShadowNode = ConcreteViewShadowNode<
-    RNSScreenStackHostComponentName,
-    RNSScreenStackHostProps,
-    RNSScreenStackHostEventEmitter,
-    RNSScreenStackHostState>;
-
 JSI_EXPORT extern const char RNSSplitViewHostComponentName[];
 
 /*
@@ -61,6 +50,17 @@ using RNSSplitViewHostShadowNode = ConcreteViewShadowNode<
     RNSSplitViewHostProps,
     RNSSplitViewHostEventEmitter,
     RNSSplitViewHostState>;
+
+JSI_EXPORT extern const char RNSStackHostComponentName[];
+
+/*
+ * `ShadowNode` for <RNSStackHost> component.
+ */
+using RNSStackHostShadowNode = ConcreteViewShadowNode<
+    RNSStackHostComponentName,
+    RNSStackHostProps,
+    RNSStackHostEventEmitter,
+    RNSStackHostState>;
 
 JSI_EXPORT extern const char RNSStackScreenComponentName[];
 

@@ -339,8 +339,7 @@ console.log('Final senderActorId:', senderActorId);
               //data={tickets}
               data={tickets.filter(
                 item =>
-                    item.customer_portal === '' || item.customer_portal === ' ' || item.customer_portal === 'False' ||
-                    item.customer_portal === false
+                    item.customer_portal === 'True' || item.customer_portal === true
               )}
               keyExtractor={(item) => item.ticketId}
               showsVerticalScrollIndicator={false}
@@ -373,7 +372,7 @@ console.log('Final senderActorId:', senderActorId);
 
 
               {!loading &&
-                tickets.filter(item => item.customer_portal === '' || item.customer_portal === ' ' || item.customer_portal === 'False' || item.customer_portal === false).length === 0 && (
+                tickets.filter(item => item.customer_portal === 'True' || item.customer_portal === true ).length === 0 && (
                     <Text style={styles.noTicketText}>No tickets found</Text>
                 )}
 
@@ -391,76 +390,20 @@ export default OwnerTickets;
 
 const styles = StyleSheet.create({
   background: { flex: 1 },
-  container: {
-    flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: Platform.OS === 'android' ? 60 : 60,
-    backgroundColor: '#fff',
-  },
-  flexClass: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom:26,
-  },
+  container: { flex: 1, paddingHorizontal: 16, paddingTop: Platform.OS === 'android' ? 60 : 60, backgroundColor: '#fff', },
+  flexClass: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom:26, },
   rightarrowIcon: { width: 11.86, height: 21.21 },
   logoSyil: { width: 87.6, height: 24 },
   ticketIcon: { width: 26.88, height: 21.88 },
-  initialsAvatar:{width:30,height:30,backgroundColor:'#000',borderRadius:100,justifyContent:'center',alignItems:'center',},
-  initialsText:{fontSize:14,fontWeight:500,color:'#FFEA00'},
-  profileImage:{width:30,height:30,},
-
-
-
-    ticketContainer: {
-        marginTop: 10,
-    },
-
-    tableHeader: {
-        flexDirection: 'row',
-        paddingVertical: 10,
-        borderBottomWidth: 1,
-        borderColor: '#ddd',
-    },
-
-    tableRow: {
-        flexDirection: 'row',
-        paddingVertical: 14,
-        borderBottomWidth: 1,
-        borderColor: '#f0f0f0',
-    }, 
-
-    cellID:{
-        flex: '0 0 25%',
-        width:'25%',
-        fontSize: 12,
-        color: '#333',
-        padding:5,
-        fontWeight:700,
-    },
-
-    cell: {
-        flex: '0 0 25%',
-        width:'25%',
-        fontSize: 12,
-        color: '#333',
-        padding:5,
-    },
-
-    headerText: {
-        fontWeight: '600',
-        color: '#000',
-    },
-
-    closedStatus: {
-        color: '#2e7d32',
-        fontWeight: '600',
-    },
-
-    noTicketText: {
-        textAlign: 'center',
-        marginTop: 20,
-        color: '#999',
-    },
-
+  initialsAvatar:{ width:30,height:30,backgroundColor:'#000',borderRadius:100,justifyContent:'center',alignItems:'center',},
+  initialsText:{ fontSize:14,fontWeight:500,color:'#FFEA00'},
+  profileImage:{ width:30,height:30,},
+    ticketContainer: { marginTop: 10, },
+    tableHeader: { flexDirection: 'row', paddingVertical: 10, borderBottomWidth: 1, borderColor: '#ddd', },
+    tableRow: { flexDirection: 'row', paddingVertical: 14, borderBottomWidth: 1, borderColor: '#f0f0f0', }, 
+    cellID:{ flex: '0 0 25%', width:'25%', fontSize: 12, color: '#333',padding:5, fontWeight:700, },
+    cell: { flex: '0 0 25%', width:'25%', fontSize: 12, color: '#333', padding:5, },
+    headerText: { fontWeight: '600', color: '#000', },
+    closedStatus: { color: '#2e7d32', fontWeight: '600', },
+    noTicketText: { textAlign: 'center', marginTop: 20, color: '#999', },
 })

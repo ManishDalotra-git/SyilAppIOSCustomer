@@ -128,23 +128,7 @@ const Feedback = () => {
       
       <ScrollView contentContainerStyle={styles.container}>
         {/* ---------- Subject ---------- */}
-        {/* <View style={[styles.input, errors.subject && styles.errorInput, { padding: 0 }]}>
-          <Picker
-            selectedValue={subject}
-            onValueChange={value => {
-              setSubject(value);
-              setErrors({ ...errors, subject: null });
-            }}
-            style={{ height: 53, color: subject === '' ? '#999' : '#000' }}
-          >
-            <Picker.Item label="Choose Your Subject" value="" color="#999" />
-            <Picker.Item label="Bug Report" value="bug" />
-            <Picker.Item label="Suggestion" value="suggestion" />
-            <Picker.Item label="UI Issue" value="ui" />
-            <Picker.Item label="Performance Issue" value="performance" />
-          </Picker>
-        </View> */}
-
+        
         <TouchableOpacity
             style={[styles.input, errors.subject && styles.errorInput]}
             onPress={() => setShowSubjectModal(true)}
@@ -200,26 +184,7 @@ const Feedback = () => {
             setErrors({ ...errors, message: null });
           }}
         />
-
-        {/* ---------- Rating ---------- */}
-        {/* <View style={[styles.input, errors.rating && styles.errorInput, { padding: 0 }]}>
-          <Picker
-            selectedValue={rating}
-            onValueChange={value => {
-              setRating(value);
-              setErrors({ ...errors, rating: null });
-            }}
-            style={{ height: 53, color: rating === '' ? '#999' : '#000' }}
-          >
-            <Picker.Item label="What rating would you give the app?" value="" color="#999" />
-            <Picker.Item label="⭐ 1" value="1" />
-            <Picker.Item label="⭐ 2" value="2" />
-            <Picker.Item label="⭐ 3" value="3" />
-            <Picker.Item label="⭐ 4" value="4" />
-            <Picker.Item label="⭐ 5" value="5" />
-          </Picker>
-        </View> */}
-
+        
         <TouchableOpacity
             style={[styles.input, errors.rating && styles.errorInput]}
             onPress={() => setShowRatingModal(true)}
@@ -293,7 +258,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   header: {
-    height: 45,
+    height: 25,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,

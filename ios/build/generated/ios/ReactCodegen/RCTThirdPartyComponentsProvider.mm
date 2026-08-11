@@ -36,7 +36,7 @@
 		@"RNSScreenStack": NSClassFromString(@"RNSScreenStackView"), // react-native-screens
 		@"RNSSearchBar": NSClassFromString(@"RNSSearchBar"), // react-native-screens
 		@"RNSStackScreen": NSClassFromString(@"RNSStackScreenComponentView"), // react-native-screens
-		@"RNSScreenStackHost": NSClassFromString(@"RNSScreenStackHostComponentView"), // react-native-screens
+		@"RNSStackHost": NSClassFromString(@"RNSStackHostComponentView"), // react-native-screens
 		@"RNSBottomTabsScreen": NSClassFromString(@"RNSBottomTabsScreenComponentView"), // react-native-screens
 		@"RNSBottomTabs": NSClassFromString(@"RNSBottomTabsHostComponentView"), // react-native-screens
 		@"RNSBottomTabsAccessory": NSClassFromString(@"RNSBottomTabsAccessoryComponentView"), // react-native-screens

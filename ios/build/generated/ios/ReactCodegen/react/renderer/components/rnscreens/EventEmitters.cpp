@@ -80,7 +80,6 @@ void RNSBottomTabsScreenEventEmitter::onDidDisappear(OnDidDisappear event) const
 
 
 
-
 void RNSSplitViewHostEventEmitter::onCollapse(OnCollapse event) const {
   dispatchEvent("collapse", [](jsi::Runtime &runtime) {
     auto payload = jsi::Object(runtime);
@@ -154,6 +153,7 @@ void RNSSplitViewScreenEventEmitter::onDidDisappear(OnDidDisappear event) const 
 }
 
 
+
 void RNSStackScreenEventEmitter::onWillAppear(OnWillAppear event) const {
   dispatchEvent("willAppear", [](jsi::Runtime &runtime) {
     auto payload = jsi::Object(runtime);
@@ -185,6 +185,15 @@ void RNSStackScreenEventEmitter::onDidDisappear(OnDidDisappear event) const {
   dispatchEvent("didDisappear", [](jsi::Runtime &runtime) {
     auto payload = jsi::Object(runtime);
     
+    return payload;
+  });
+}
+
+
+void RNSStackScreenEventEmitter::onDismiss(OnDismiss event) const {
+  dispatchEvent("dismiss", [event=std::move(event)](jsi::Runtime &runtime) {
+    auto payload = jsi::Object(runtime);
+    payload.setProperty(runtime, "isNativeDismiss", event.isNativeDismiss);
     return payload;
   });
 }

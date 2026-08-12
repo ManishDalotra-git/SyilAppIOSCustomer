@@ -211,7 +211,7 @@ useFocusEffect(
           </View>
 
           <View style={styles.fourCardsRowContent}>
-            <Text allowFontScaling={false} style={styles.fourCardsRowTitle}>Chat With Alex</Text>
+            <Text allowFontScaling={false} style={styles.fourCardsRowTitle}>Chat with SYIL</Text>
           </View>
         </Pressable>
       </View>

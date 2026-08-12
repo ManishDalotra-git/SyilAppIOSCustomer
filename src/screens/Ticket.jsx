@@ -333,7 +333,7 @@ const formatCategoryLabel = (key) => {
         <View style={{ flex:1, backgroundColor:'#00000066', justifyContent:'center' }}>
           <View style={{ backgroundColor:'#fff', margin:20, borderRadius:10 }}>
 
-            {['X5','X7','X9','X11','L2','L3'].map(item => (
+            {['X5','X7','X9','X11','L2','L3','L4','G2','R1'].map(item => (
               <TouchableOpacity
                 key={item}
                 style={{ padding:15, borderBottomWidth:1 }}

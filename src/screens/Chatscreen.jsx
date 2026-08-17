@@ -40,7 +40,7 @@ const Chatscreen = () => {
         </TouchableOpacity>
 
         <Text style={styles.headerTitle}>Ask SYIL</Text>
-      </View>
+      </View> 
 
       
       {!chatReady && (

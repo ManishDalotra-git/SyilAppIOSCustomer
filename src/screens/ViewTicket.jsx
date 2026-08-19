@@ -67,7 +67,7 @@ const ViewTicket = ({ navigation }) => {
                 try {
                     setLoading(true);
 
-                    const response = await fetch('https://syilappcustomer.onrender.com/get_tickets', {
+                    const response = await fetch('https://syilappioscustomer.onrender.com/get_tickets', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

@@ -30,7 +30,7 @@ const ForgotPassword = () => {
 
     setLoading(true);
     try {
-      const response = await fetch('https://syilappcustomer.onrender.com/forgot_password', {
+      const response = await fetch('https://syilappioscustomer.onrender.com/forgot_password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),

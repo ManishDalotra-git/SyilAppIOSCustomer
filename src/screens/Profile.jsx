@@ -111,7 +111,7 @@ const Profile = ({ navigation }) => {
 
     try {
       const response = await fetch(
-        'https://syilappcustomer.onrender.com/update-profile',
+        'https://syilappioscustomer.onrender.com/update-profile',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

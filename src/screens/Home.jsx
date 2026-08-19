@@ -23,7 +23,7 @@ const Home = () => {
   useEffect(() => {
   const fetchArticles = async () => {
     try {
-      const res = await fetch('https://syilappcustomer.onrender.com/articles');
+      const res = await fetch('https://syilappioscustomer.onrender.com/articles');
       const data = await res.json();
 
       const newArticles = data.filter(item =>
@@ -63,7 +63,7 @@ useFocusEffect(
         if (!email) return;
 
         const res = await fetch(
-          'https://syilappcustomer.onrender.com/get-user-data',
+          'https://syilappioscustomer.onrender.com/get-user-data',
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

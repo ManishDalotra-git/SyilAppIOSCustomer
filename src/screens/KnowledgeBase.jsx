@@ -83,7 +83,7 @@ useEffect(() => {
   const fetchArticles = async () => {
     try {
       const response = await fetch(
-        'https://syilappcustomer.onrender.com/articles'
+        'https://syilappioscustomer.onrender.com/articles'
       );
       const data = await response.json();
 

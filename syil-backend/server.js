@@ -2667,16 +2667,19 @@ if (
 
                     type:
                       'support_reply',
-                  },
-                  ticketUnreadCount:
-                    String(
-                      newCustomerUnread,
-                    ),
 
-                  totalUnreadCount:
-                    String(
-                      totalUnreadCount,
-                    ),
+                    ticketUnreadCount:
+                      String(
+                        newCustomerUnread,
+                      ),
+
+                    totalUnreadCount:
+                      String(
+                        totalUnreadCount,
+                      ),
+
+                    },
+                  
 
 
                   /*

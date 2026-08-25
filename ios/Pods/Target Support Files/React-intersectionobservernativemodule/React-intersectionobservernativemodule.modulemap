@@ -1,4 +1,4 @@
-module react_nativemodule_intersectionobserver {
+framework module intersectionobservernativemodule {
   umbrella header "React-intersectionobservernativemodule-umbrella.h"
 
   export *

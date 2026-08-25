@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "8DD4FED383460DBE5054E426B1503285"
-               BuildableName = "libRCTSwiftUI.a"
+               BuildableName = "RCTSwiftUI.framework"
                BlueprintName = "RCTSwiftUI"
                ReferencedContainer = "container:Pods.xcodeproj">
             </BuildableReference>

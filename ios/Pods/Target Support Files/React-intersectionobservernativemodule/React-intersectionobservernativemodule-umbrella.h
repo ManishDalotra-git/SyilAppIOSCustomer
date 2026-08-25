@@ -10,8 +10,8 @@
 #endif
 #endif
 
-#import "react/nativemodule/intersectionobserver/NativeIntersectionObserver.h"
+#import "nativemodule/intersectionobserver/NativeIntersectionObserver.h"
 
-FOUNDATION_EXPORT double react_nativemodule_intersectionobserverVersionNumber;
-FOUNDATION_EXPORT const unsigned char react_nativemodule_intersectionobserverVersionString[];
+FOUNDATION_EXPORT double intersectionobservernativemoduleVersionNumber;
+FOUNDATION_EXPORT const unsigned char intersectionobservernativemoduleVersionString[];
 

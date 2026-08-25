@@ -13,6 +13,6 @@
 #import "react/networking/NetworkReporter.h"
 #import "react/networking/NetworkTypes.h"
 
-FOUNDATION_EXPORT double react_networkingVersionNumber;
-FOUNDATION_EXPORT const unsigned char react_networkingVersionString[];
+FOUNDATION_EXPORT double React_networkingVersionNumber;
+FOUNDATION_EXPORT const unsigned char React_networkingVersionString[];
 

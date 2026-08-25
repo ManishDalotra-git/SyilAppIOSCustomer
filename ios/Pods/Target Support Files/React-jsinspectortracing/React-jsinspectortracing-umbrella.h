@@ -27,6 +27,6 @@
 #import "jsinspector-modern/tracing/TracingMode.h"
 #import "jsinspector-modern/tracing/TracingState.h"
 
-FOUNDATION_EXPORT double jsinspector_modern_tracingVersionNumber;
-FOUNDATION_EXPORT const unsigned char jsinspector_modern_tracingVersionString[];
+FOUNDATION_EXPORT double jsinspector_moderntracingVersionNumber;
+FOUNDATION_EXPORT const unsigned char jsinspector_moderntracingVersionString[];
 

@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "4D0840ABCF1443F3B4ECF1BA2291A742"
-               BuildableName = "libReact-performancecdpmetrics.a"
+               BuildableName = "React_performancecdpmetrics.framework"
                BlueprintName = "React-performancecdpmetrics"
                ReferencedContainer = "container:Pods.xcodeproj">
             </BuildableReference>

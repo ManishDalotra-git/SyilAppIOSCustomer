@@ -20,7 +20,10 @@
 
   dispatch_once(&onceToken, ^{
     NSDictionary<NSString *, NSString *> * moduleMapping = @{
-      		@"RNCWebViewModule": @"RNCWebViewModule", // react-native-webview
+      		@"NativeRNFBTurboApp": @"RNFBAppModule", // @react-native-firebase/app
+		@"NativeRNFBTurboUtils": @"RNFBUtilsModule", // @react-native-firebase/app
+		@"NativeRNFBTurboMessaging": @"RNFBMessagingModule", // @react-native-firebase/messaging
+		@"RNCWebViewModule": @"RNCWebViewModule", // react-native-webview
     };
 
     NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithCapacity:moduleMapping.count];

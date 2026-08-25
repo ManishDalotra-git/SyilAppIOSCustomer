@@ -2,6 +2,7 @@ import UIKit
 import React
 import React_RCTAppDelegate
 import ReactAppDependencyProvider
+import Firebase
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -14,6 +15,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
   ) -> Bool {
+
+    // Firebase initialize
+    FirebaseApp.configure()
+
     let delegate = ReactNativeDelegate()
     let factory = RCTReactNativeFactory(delegate: delegate)
     delegate.dependencyProvider = RCTAppDependencyProvider()
@@ -42,17 +47,35 @@ class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
 #if DEBUG
     let settings = RCTBundleURLProvider.sharedSettings()
 
-    if let metroHost = Bundle.main.object(forInfoDictionaryKey: "MetroServerHost") as? String,
+    if let metroHost = Bundle.main.object(
+      forInfoDictionaryKey: "MetroServerHost"
+    ) as? String,
        !metroHost.isEmpty {
-      settings.jsLocation = metroHost.trimmingCharacters(in: .whitespacesAndNewlines)
-    } else if let envHost = ProcessInfo.processInfo.environment["RCT_METRO_HOST"],
+
+      settings.jsLocation =
+        metroHost.trimmingCharacters(
+          in: .whitespacesAndNewlines
+        )
+
+    } else if let envHost =
+                ProcessInfo.processInfo
+                  .environment["RCT_METRO_HOST"],
               !envHost.isEmpty {
-      settings.jsLocation = envHost.trimmingCharacters(in: .whitespacesAndNewlines)
+
+      settings.jsLocation =
+        envHost.trimmingCharacters(
+          in: .whitespacesAndNewlines
+        )
     }
 
-    return settings.jsBundleURL(forBundleRoot: "index")
+    return settings.jsBundleURL(
+      forBundleRoot: "index"
+    )
 #else
-    return Bundle.main.url(forResource: "main", withExtension: "jsbundle")
+    return Bundle.main.url(
+      forResource: "main",
+      withExtension: "jsbundle"
+    )
 #endif
   }
 }

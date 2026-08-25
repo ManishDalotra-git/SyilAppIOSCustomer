@@ -1414,6 +1414,212 @@ app.get('/customer-news', async (req, res) => {
 });
  
 
+app.post(
+  '/save-customer-fcm-token',
+  async (req, res) => {
+
+    const {
+      email,
+      fcmToken,
+      platform,
+    } = req.body;
+
+    if (!email || !fcmToken) {
+      return res.status(400).json({
+        success: false,
+        message:
+          'Email and FCM token are required',
+      });
+    }
+
+    try {
+
+      const fetch = (...args) =>
+        import('node-fetch').then(
+          ({ default: fetch }) =>
+            fetch(...args),
+        );
+
+      /*
+       * HubSpot contact find by email.
+       */
+      const searchResponse =
+        await fetch(
+          'https://api.hubapi.com/crm/v3/objects/contacts/search',
+          {
+            method: 'POST',
+
+            headers: {
+              Authorization:
+                `Bearer ${HUBSPOT_API_KEY}`,
+
+              'Content-Type':
+                'application/json',
+            },
+
+            body: JSON.stringify({
+              filterGroups: [
+                {
+                  filters: [
+                    {
+                      propertyName:
+                        'email',
+
+                      operator:
+                        'EQ',
+
+                      value:
+                        email
+                          .trim()
+                          .toLowerCase(),
+                    },
+                  ],
+                },
+              ],
+
+              properties: [
+                'email',
+                'customer_fcm_token',
+              ],
+
+              limit: 1,
+            }),
+          },
+        );
+
+      const searchData =
+        await searchResponse.json();
+
+      if (!searchResponse.ok) {
+
+        console.error(
+          'Customer contact search error:',
+          searchData,
+        );
+
+        return res
+          .status(searchResponse.status)
+          .json({
+            success: false,
+            message:
+              'Unable to search HubSpot contact',
+            detail:
+              searchData,
+          });
+      }
+
+      if (
+        !searchData.results?.length
+      ) {
+
+        return res.status(404).json({
+          success: false,
+          message:
+            'HubSpot contact not found',
+        });
+      }
+
+      const contactId =
+        searchData.results[0].id;
+
+
+      /*
+       * Customer FCM token save.
+       */
+      const updateResponse =
+        await fetch(
+          `https://api.hubapi.com/crm/v3/objects/contacts/${contactId}`,
+          {
+            method:
+              'PATCH',
+
+            headers: {
+              Authorization:
+                `Bearer ${HUBSPOT_API_KEY}`,
+
+              'Content-Type':
+                'application/json',
+            },
+
+            body:
+              JSON.stringify({
+                properties: {
+                  customer_fcm_token:
+                    fcmToken,
+                },
+              }),
+          },
+        );
+
+      const updateText =
+        await updateResponse.text();
+
+      let updateData = {};
+
+      try {
+
+        updateData =
+          updateText
+            ? JSON.parse(
+                updateText,
+              )
+            : {};
+
+      } catch {
+
+        updateData = {
+          rawResponse:
+            updateText,
+        };
+      }
+
+      if (!updateResponse.ok) {
+
+        console.error(
+          'Customer FCM token update error:',
+          updateData,
+        );
+
+        return res
+          .status(updateResponse.status)
+          .json({
+            success: false,
+            message:
+              'Customer FCM token could not be saved',
+            detail:
+              updateData,
+          });
+      }
+
+      console.log(
+        `Customer FCM token saved for contact ${contactId}, platform ${platform || 'unknown'}`,
+      );
+
+      return res.status(200).json({
+        success: true,
+        message:
+          'Customer FCM token saved successfully',
+        contactId,
+        platform:
+          platform || '',
+      });
+
+    } catch (error) {
+
+      console.error(
+        'Save customer FCM token error:',
+        error,
+      );
+
+      return res.status(500).json({
+        success: false,
+        message:
+          'Internal server error',
+      });
+    }
+  },
+);
+
 
 app.listen(PORT,'0.0.0.0', () => console.log(`Server running on http://localhost:${PORT}`));
 

@@ -1,4 +1,4 @@
-module RCTSwiftUI {
+framework module RCTSwiftUI {
   umbrella header "RCTSwiftUI-umbrella.h"
 
   export *

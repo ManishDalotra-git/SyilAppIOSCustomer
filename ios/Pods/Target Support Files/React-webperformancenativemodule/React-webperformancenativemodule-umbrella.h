@@ -10,8 +10,8 @@
 #endif
 #endif
 
-#import "react/nativemodule/webperformance/NativePerformance.h"
+#import "nativemodule/webperformance/NativePerformance.h"
 
-FOUNDATION_EXPORT double react_nativemodule_webperformanceVersionNumber;
-FOUNDATION_EXPORT const unsigned char react_nativemodule_webperformanceVersionString[];
+FOUNDATION_EXPORT double webperformancenativemoduleVersionNumber;
+FOUNDATION_EXPORT const unsigned char webperformancenativemoduleVersionString[];
 

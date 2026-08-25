@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "6AF03E2611B1760E48E5585A3D594DDA"
-               BuildableName = "libReact-intersectionobservernativemodule.a"
+               BuildableName = "intersectionobservernativemodule.framework"
                BlueprintName = "React-intersectionobservernativemodule"
                ReferencedContainer = "container:Pods.xcodeproj">
             </BuildableReference>

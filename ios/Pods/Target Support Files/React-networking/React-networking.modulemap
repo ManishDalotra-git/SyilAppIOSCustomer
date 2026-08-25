@@ -1,4 +1,4 @@
-module react_networking {
+framework module React_networking {
   umbrella header "React-networking-umbrella.h"
 
   export *

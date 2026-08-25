@@ -1,4 +1,4 @@
-module Pods_syilReact {
+framework module Pods_syilReact {
   umbrella header "Pods-syilReact-umbrella.h"
 
   export *

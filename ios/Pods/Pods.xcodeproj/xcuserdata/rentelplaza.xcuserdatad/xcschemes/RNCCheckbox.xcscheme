@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "A9119DF73C792117B73D3FC502B5652E"
-               BuildableName = "libRNCCheckbox.a"
+               BuildableName = "RNCCheckbox.framework"
                BlueprintName = "RNCCheckbox"
                ReferencedContainer = "container:Pods.xcodeproj">
             </BuildableReference>

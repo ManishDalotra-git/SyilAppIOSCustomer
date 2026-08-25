@@ -1,4 +1,4 @@
-module react_nativemodule_webperformance {
+framework module webperformancenativemodule {
   umbrella header "React-webperformancenativemodule-umbrella.h"
 
   export *

@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "29779911AE4C8680B4F35F39F476E106"
-               BuildableName = "libPods-syilReact.a"
+               BuildableName = "Pods_syilReact.framework"
                BlueprintName = "Pods-syilReact"
                ReferencedContainer = "container:Pods.xcodeproj">
             </BuildableReference>

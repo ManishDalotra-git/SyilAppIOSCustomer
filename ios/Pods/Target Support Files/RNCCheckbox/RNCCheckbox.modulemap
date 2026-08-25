@@ -1,0 +1,6 @@
+framework module RNCCheckbox {
+  umbrella header "RNCCheckbox-umbrella.h"
+
+  export *
+  module * { export * }
+}

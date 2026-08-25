@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "430D7C4A9EC9AB29B0505AFA151AABBF"
-               BuildableName = "libRNFS.a"
+               BuildableName = "RNFS.framework"
                BlueprintName = "RNFS"
                ReferencedContainer = "container:Pods.xcodeproj">
             </BuildableReference>

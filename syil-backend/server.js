@@ -1665,6 +1665,833 @@ app.post(
 );
 
 
+
+
+app.post(
+  '/hubspot-webhook',
+  async (req, res) => {
+
+    /*
+     * HubSpot ko immediately 200 dena important hai.
+     * Warna HubSpot webhook retry kar sakta hai.
+     */
+    res.sendStatus(200);
+
+    try {
+
+      console.log(
+        '========== CUSTOMER HUBSPOT WEBHOOK RECEIVED ==========',
+      );
+
+      console.log(
+        'Webhook body:',
+        JSON.stringify(
+          req.body,
+          null,
+          2,
+        ),
+      );
+
+
+      const events =
+        Array.isArray(req.body)
+          ? req.body
+          : [];
+
+
+      if (!events.length) {
+
+        console.log(
+          'Customer webhook body empty',
+        );
+
+        return;
+      }
+
+
+      /*
+       * Abhi first event process.
+       */
+      const event =
+        events[0];
+
+
+      const threadId =
+        event.objectId;
+
+      const webhookMessageId =
+        event.messageId;
+
+
+      console.log(
+        'Customer Thread ID:',
+        threadId,
+      );
+
+      console.log(
+        'Customer Webhook Message ID:',
+        webhookMessageId,
+      );
+
+      console.log(
+        'Customer Subscription Type:',
+        event.subscriptionType,
+      );
+
+
+      if (
+        !threadId ||
+        !webhookMessageId
+      ) {
+
+        console.log(
+          'Customer webhook threadId/messageId missing',
+        );
+
+        return;
+      }
+
+
+      const fetch =
+        (...args) =>
+          import(
+            'node-fetch'
+          ).then(
+            ({
+              default: fetch,
+            }) =>
+              fetch(...args),
+          );
+
+
+      /*
+       * =====================================================
+       * STEP 1
+       * Exact conversation message fetch karo.
+       * =====================================================
+       */
+      const messagesResponse =
+        await fetch(
+          `https://api.hubapi.com/conversations/v3/conversations/threads/${threadId}/messages`,
+          {
+            method:
+              'GET',
+
+            headers: {
+              Authorization:
+                `Bearer ${HUBSPOT_API_KEY}`,
+
+              'Content-Type':
+                'application/json',
+            },
+          },
+        );
+
+
+      const messagesData =
+        await messagesResponse.json();
+
+
+      console.log(
+        'Customer messages status:',
+        messagesResponse.status,
+      );
+
+
+      if (
+        !messagesResponse.ok
+      ) {
+
+        console.error(
+          'Customer HubSpot messages error:',
+          messagesData,
+        );
+
+        return;
+      }
+
+
+      const latestMessage =
+        (
+          messagesData.results ||
+          []
+        ).find(
+          message =>
+            message.type ===
+              'MESSAGE' &&
+            String(
+              message.id,
+            ) ===
+              String(
+                webhookMessageId,
+              ),
+        );
+
+
+      if (!latestMessage) {
+
+        console.log(
+          'Customer exact webhook message not found',
+        );
+
+        return;
+      }
+
+
+      console.log(
+        'Customer message direction:',
+        latestMessage.direction,
+      );
+
+      console.log(
+        'Customer message text:',
+        latestMessage.text,
+      );
+
+
+      /*
+       * CUSTOMER APP RULE:
+       *
+       * Customer ko notification sirf
+       * Support / HubSpot se reply aane par.
+       *
+       * OUTGOING = HubSpot/Support -> Customer
+       *
+       * INCOMING = Customer -> HubSpot
+       *
+       * Incoming ko customer ko wapas notify
+       * nahi karna.
+       */
+      if (
+        latestMessage.direction !==
+        'OUTGOING'
+      ) {
+
+        console.log(
+          `Customer push skipped: direction is ${latestMessage.direction}`,
+        );
+
+        return;
+      }
+
+
+      /*
+       * =====================================================
+       * STEP 2
+       * Thread se associated Ticket find karo.
+       * =====================================================
+       */
+      const ticketSearchResponse =
+        await fetch(
+          'https://api.hubapi.com/crm/v3/objects/tickets/search',
+          {
+            method:
+              'POST',
+
+            headers: {
+              Authorization:
+                `Bearer ${HUBSPOT_API_KEY}`,
+
+              'Content-Type':
+                'application/json',
+            },
+
+            body:
+              JSON.stringify({
+                filterGroups: [
+                  {
+                    filters: [
+                      {
+                        propertyName:
+                          'hs_conversations_originating_thread_id',
+
+                        operator:
+                          'EQ',
+
+                        value:
+                          String(
+                            threadId,
+                          ),
+                      },
+                    ],
+                  },
+                ],
+
+                properties: [
+                  'subject',
+                  'customer_portal',
+                  'hs_conversations_originating_thread_id',
+                ],
+
+                limit:
+                  1,
+              }),
+          },
+        );
+
+
+      const ticketSearchData =
+        await ticketSearchResponse.json();
+
+
+      console.log(
+        'Customer ticket search status:',
+        ticketSearchResponse.status,
+      );
+
+
+      if (
+        !ticketSearchResponse.ok
+      ) {
+
+        console.error(
+          'Customer ticket search error:',
+          ticketSearchData,
+        );
+
+        return;
+      }
+
+
+      if (
+        !ticketSearchData
+          .results
+          ?.length
+      ) {
+
+        console.log(
+          'Customer ticket not found for thread:',
+          threadId,
+        );
+
+        return;
+      }
+
+
+      const matchedTicket =
+        ticketSearchData
+          .results[0];
+
+
+      const ticketId =
+        String(
+          matchedTicket.id,
+        );
+
+
+      const ticketSubject =
+        matchedTicket
+          .properties
+          ?.subject ||
+        'Ticket Update';
+
+
+      const rawCustomerPortal =
+        matchedTicket
+          .properties
+          ?.customer_portal;
+
+
+      const normalizedCustomerPortal =
+        String(
+          rawCustomerPortal ??
+          '',
+        )
+          .trim()
+          .toLowerCase();
+
+
+      const isCustomerPortalTicket =
+        rawCustomerPortal ===
+          true ||
+        normalizedCustomerPortal ===
+          'true' ||
+        normalizedCustomerPortal ===
+          'yes' ||
+        normalizedCustomerPortal ===
+          '1';
+
+
+      console.log(
+        'Customer Matched Ticket ID:',
+        ticketId,
+      );
+
+      console.log(
+        'Customer Ticket Subject:',
+        ticketSubject,
+      );
+
+      console.log(
+        'customer_portal raw:',
+        rawCustomerPortal,
+      );
+
+      console.log(
+        'Is Customer Portal Ticket:',
+        isCustomerPortalTicket,
+      );
+
+
+      /*
+       * Sirf customer_portal=True tickets
+       * Customer app me notification bhejenge.
+       */
+      if (
+        !isCustomerPortalTicket
+      ) {
+
+        console.log(
+          'Customer push skipped: customer_portal is not true',
+        );
+
+        return;
+      }
+
+
+      /*
+       * =====================================================
+       * STEP 3
+       * Ticket ke associated Contacts find karo.
+       * =====================================================
+       */
+      const contactsResponse =
+        await fetch(
+          `https://api.hubapi.com/crm/v3/objects/tickets/${ticketId}/associations/contacts`,
+          {
+            method:
+              'GET',
+
+            headers: {
+              Authorization:
+                `Bearer ${HUBSPOT_API_KEY}`,
+
+              'Content-Type':
+                'application/json',
+            },
+          },
+        );
+
+
+      const contactsData =
+        await contactsResponse.json();
+
+
+      console.log(
+        'Customer ticket contacts status:',
+        contactsResponse.status,
+      );
+
+
+      if (
+        !contactsResponse.ok
+      ) {
+
+        console.error(
+          'Customer ticket contacts error:',
+          contactsData,
+        );
+
+        return;
+      }
+
+
+      const associatedContactIds =
+        (
+          contactsData.results ||
+          []
+        )
+          .map(
+            item =>
+              String(
+                item.id,
+              ),
+          )
+          .filter(
+            Boolean,
+          );
+
+
+      console.log(
+        'Customer Associated Contact IDs:',
+        associatedContactIds,
+      );
+
+
+      if (
+        !associatedContactIds.length
+      ) {
+
+        console.log(
+          'Customer push skipped: no associated contact',
+        );
+
+        return;
+      }
+
+
+      /*
+       * =====================================================
+       * STEP 4
+       * Associated contacts ka customer_fcm_token fetch.
+       * =====================================================
+       */
+      const contactRequests =
+        associatedContactIds.map(
+          async contactId => {
+
+            const response =
+              await fetch(
+                `https://api.hubapi.com/crm/v3/objects/contacts/${contactId}?properties=email,firstname,lastname,customer_fcm_token`,
+                {
+                  method:
+                    'GET',
+
+                  headers: {
+                    Authorization:
+                      `Bearer ${HUBSPOT_API_KEY}`,
+
+                    'Content-Type':
+                      'application/json',
+                  },
+                },
+              );
+
+
+            const data =
+              await response.json();
+
+
+            if (
+              !response.ok
+            ) {
+
+              console.error(
+                `Customer contact ${contactId} fetch failed:`,
+                data,
+              );
+
+              return null;
+            }
+
+
+            return data;
+          },
+        );
+
+
+      const associatedContacts =
+        (
+          await Promise.all(
+            contactRequests,
+          )
+        ).filter(
+          Boolean,
+        );
+
+
+      console.log(
+        'Customer Associated Contacts:',
+        associatedContacts.map(
+          contact => ({
+            contactId:
+              String(
+                contact.id,
+              ),
+
+            email:
+              contact
+                .properties
+                ?.email ||
+              '',
+
+            hasCustomerToken:
+              Boolean(
+                contact
+                  .properties
+                  ?.customer_fcm_token,
+              ),
+          }),
+        ),
+      );
+
+
+      /*
+       * Sirf customer_fcm_token wale contacts.
+       */
+      const customerRecipients =
+        associatedContacts
+          .filter(
+            contact =>
+              Boolean(
+                contact
+                  .properties
+                  ?.customer_fcm_token,
+              ),
+          )
+          .map(
+            contact => ({
+              contactId:
+                String(
+                  contact.id,
+                ),
+
+              email:
+                String(
+                  contact
+                    .properties
+                    ?.email ||
+                  '',
+                )
+                  .trim()
+                  .toLowerCase(),
+
+              token:
+                contact
+                  .properties
+                  ?.customer_fcm_token,
+            }),
+          );
+
+
+      console.log(
+        'Customer notification recipients:',
+        customerRecipients.map(
+          recipient => ({
+            contactId:
+              recipient.contactId,
+
+            email:
+              recipient.email,
+          }),
+        ),
+      );
+
+
+      if (
+        !customerRecipients.length
+      ) {
+
+        console.log(
+          'Customer push skipped: no customer_fcm_token found',
+        );
+
+        return;
+      }
+
+
+      /*
+       * =====================================================
+       * STEP 5
+       * Notification content.
+       * =====================================================
+       */
+      const notificationTitle =
+        'New reply from SYIL Support';
+
+
+      const notificationBody =
+        latestMessage
+          .text
+          ?.trim() ||
+        `You have a new reply on ${ticketSubject}.`;
+
+
+      /*
+       * =====================================================
+       * STEP 6
+       * Firebase Push.
+       * =====================================================
+       */
+      const pushResults =
+        await Promise.allSettled(
+
+          customerRecipients.map(
+            async recipient => {
+
+              return getMessaging()
+                .send({
+
+                  token:
+                    recipient.token,
+
+
+                  notification: {
+
+                    title:
+                      notificationTitle,
+
+                    body:
+                      notificationBody.slice(
+                        0,
+                        200,
+                      ),
+                  },
+
+
+                  /*
+                   * IMPORTANT:
+                   *
+                   * notification tap ke baad
+                   * ViewTicketDetail ko ye data milega.
+                   *
+                   * FCM data values strings honi chahiye.
+                   */
+                  data: {
+
+                    ticketId:
+                      String(
+                        ticketId,
+                      ),
+
+                    threadId:
+                      String(
+                        threadId,
+                      ),
+
+                    messageId:
+                      String(
+                        latestMessage.id,
+                      ),
+
+                    ticketSubject:
+                      String(
+                        ticketSubject,
+                      ),
+
+                    targetScreen:
+                      'ViewTicketDetail',
+
+                    type:
+                      'support_reply',
+                  },
+
+
+                  /*
+                   * iOS APNs.
+                   */
+                  apns: {
+
+                    headers: {
+                      'apns-priority':
+                        '10',
+                    },
+
+                    payload: {
+
+                      aps: {
+
+                        alert: {
+
+                          title:
+                            notificationTitle,
+
+                          body:
+                            notificationBody.slice(
+                              0,
+                              200,
+                            ),
+                        },
+
+                        sound:
+                          'default',
+                      },
+                    },
+                  },
+                });
+            },
+          ),
+        );
+
+
+      /*
+       * Result logs.
+       */
+      pushResults.forEach(
+        (
+          result,
+          index,
+        ) => {
+
+          if (
+            result.status ===
+            'fulfilled'
+          ) {
+
+            console.log(
+              `Customer Push ${index + 1} success:`,
+              result.value,
+            );
+
+          } else {
+
+            console.error(
+              `Customer Push ${index + 1} failed:`,
+              {
+                code:
+                  result.reason
+                    ?.code,
+
+                message:
+                  result.reason
+                    ?.message,
+              },
+            );
+          }
+        },
+      );
+
+
+      const successCount =
+        pushResults.filter(
+          result =>
+            result.status ===
+            'fulfilled',
+        ).length;
+
+
+      const failureCount =
+        pushResults.length -
+        successCount;
+
+
+      console.log(
+        '========== CUSTOMER PUSH SUMMARY ==========',
+      );
+
+      console.log(
+        'Successful:',
+        successCount,
+      );
+
+      console.log(
+        'Failed:',
+        failureCount,
+      );
+
+
+    } catch (error) {
+
+      console.error(
+        'Customer HubSpot webhook processing error:',
+        {
+          code:
+            error?.code,
+
+          message:
+            error?.message,
+
+          stack:
+            error?.stack,
+        },
+      );
+    }
+  },
+);
+
+
+
+
 app.listen(PORT,'0.0.0.0', () => console.log(`Server running on http://localhost:${PORT}`));
 
 

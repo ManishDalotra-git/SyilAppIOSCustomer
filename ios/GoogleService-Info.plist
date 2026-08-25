@@ -9,22 +9,22 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.syilreact.customer</string>
+	<string>org.syil-for-customer-ios.app</string>
 	<key>PROJECT_ID</key>
 	<string>syil-app</string>
 	<key>STORAGE_BUCKET</key>
 	<string>syil-app.firebasestorage.app</string>
 	<key>IS_ADS_ENABLED</key>
-	<false></false>
+	<false/>
 	<key>IS_ANALYTICS_ENABLED</key>
-	<false></false>
+	<false/>
 	<key>IS_APPINVITE_ENABLED</key>
-	<true></true>
+	<true/>
 	<key>IS_GCM_ENABLED</key>
-	<true></true>
+	<true/>
 	<key>IS_SIGNIN_ENABLED</key>
-	<true></true>
+	<true/>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:758074279182:ios:b16d83d1e565e4c42a835f</string>
+	<string>1:758074279182:ios:f2035538a895670f2a835f</string>
 </dict>
 </plist>

@@ -1921,6 +1921,7 @@ app.post(
                   'subject',
                   'customer_portal',
                   'hs_conversations_originating_thread_id',
+                  'customer_unread_count',
                 ],
 
                 limit:
@@ -2047,6 +2048,89 @@ app.post(
 
         return;
       }
+
+
+
+      /*
+ * =====================================================
+ * CUSTOMER UNREAD COUNT
+ * =====================================================
+ *
+ * Support ka OUTGOING message aane par
+ * current ticket ka unread count +1.
+ */
+
+const currentCustomerUnread =
+  Number(
+    matchedTicket
+      .properties
+      ?.customer_unread_count ||
+    0,
+  );
+
+
+const newCustomerUnread =
+  currentCustomerUnread + 1;
+
+
+console.log(
+  `Customer Ticket ${ticketId} unread:`,
+  `${currentCustomerUnread} -> ${newCustomerUnread}`,
+);
+
+
+/*
+ * HubSpot ticket property update.
+ */
+const unreadUpdateResponse =
+  await fetch(
+    `https://api.hubapi.com/crm/v3/objects/tickets/${ticketId}`,
+    {
+      method:
+        'PATCH',
+
+      headers: {
+        Authorization:
+          `Bearer ${HUBSPOT_API_KEY}`,
+
+        'Content-Type':
+          'application/json',
+      },
+
+      body:
+        JSON.stringify({
+          properties: {
+            customer_unread_count:
+              String(
+                newCustomerUnread,
+              ),
+          },
+        }),
+    },
+  );
+
+
+const unreadUpdateData =
+  await unreadUpdateResponse.json();
+
+
+if (
+  !unreadUpdateResponse.ok
+) {
+
+  console.error(
+    'Customer unread count update failed:',
+    unreadUpdateData,
+  );
+
+} else {
+
+  console.log(
+    'Customer unread count updated successfully:',
+    newCustomerUnread,
+  );
+}
+
 
 
       /*

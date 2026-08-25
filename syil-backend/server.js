@@ -1667,6 +1667,212 @@ app.post(
 
 
 
+
+const getCustomerTotalUnreadCount =
+  async (contactId, fetch) => {
+
+    try {
+
+      /*
+       * Contact ke saath associated tickets.
+       */
+      const associationResponse =
+        await fetch(
+          `https://api.hubapi.com/crm/v3/objects/contacts/${contactId}/associations/ticket`,
+          {
+            method: 'GET',
+
+            headers: {
+              Authorization:
+                `Bearer ${HUBSPOT_API_KEY}`,
+
+              'Content-Type':
+                'application/json',
+            },
+          },
+        );
+
+
+      const associationData =
+        await associationResponse.json();
+
+
+      if (!associationResponse.ok) {
+
+        console.error(
+          'Customer unread association error:',
+          associationData,
+        );
+
+        return 0;
+      }
+
+
+      const ticketIds =
+        (
+          associationData.results ||
+          []
+        )
+          .map(
+            item =>
+              String(
+                item.id,
+              ),
+          )
+          .filter(
+            Boolean,
+          );
+
+
+      if (!ticketIds.length) {
+        return 0;
+      }
+
+
+      /*
+       * Har associated ticket ka
+       * customer_portal +
+       * customer_unread_count fetch.
+       */
+      const ticketRequests =
+        ticketIds.map(
+          async associatedTicketId => {
+
+            const response =
+              await fetch(
+                `https://api.hubapi.com/crm/v3/objects/tickets/${associatedTicketId}?properties=customer_portal,customer_unread_count`,
+                {
+                  method: 'GET',
+
+                  headers: {
+                    Authorization:
+                      `Bearer ${HUBSPOT_API_KEY}`,
+
+                    'Content-Type':
+                      'application/json',
+                  },
+                },
+              );
+
+
+            const data =
+              await response.json();
+
+
+            if (!response.ok) {
+
+              console.error(
+                `Customer unread ticket ${associatedTicketId} fetch failed:`,
+                data,
+              );
+
+              return null;
+            }
+
+
+            return data;
+          },
+        );
+
+
+      const tickets =
+        (
+          await Promise.all(
+            ticketRequests,
+          )
+        ).filter(
+          Boolean,
+        );
+
+
+      /*
+       * Sirf Customer Portal tickets
+       * include karne hain.
+       */
+      const customerTickets =
+        tickets.filter(
+          ticket => {
+
+            const rawCustomerPortal =
+              ticket.properties
+                ?.customer_portal;
+
+
+            const normalized =
+              String(
+                rawCustomerPortal ?? '',
+              )
+                .trim()
+                .toLowerCase();
+
+
+            const isCustomerPortal =
+              rawCustomerPortal === true ||
+              normalized === 'true' ||
+              normalized === 'yes' ||
+              normalized === '1';
+
+
+            return isCustomerPortal;
+          },
+        );
+
+
+      /*
+       * Total unread.
+       */
+      const totalUnreadCount =
+        customerTickets.reduce(
+          (
+            total,
+            ticket,
+          ) => {
+
+            const count =
+              Number(
+                ticket
+                  .properties
+                  ?.customer_unread_count ||
+                0,
+              );
+
+
+            return (
+              total +
+              (
+                Number.isFinite(
+                  count,
+                )
+                  ? count
+                  : 0
+              )
+            );
+          },
+          0,
+        );
+
+
+      console.log(
+        `Total Customer unread for contact ${contactId}:`,
+        totalUnreadCount,
+      );
+
+
+      return totalUnreadCount;
+
+    } catch (error) {
+
+      console.error(
+        'getCustomerTotalUnreadCount error:',
+        error,
+      );
+
+      return 0;
+    }
+  };
+
+
+
 app.post(
   '/hubspot-webhook',
   async (req, res) => {
@@ -2393,6 +2599,19 @@ if (
           customerRecipients.map(
             async recipient => {
 
+
+              const totalUnreadCount =
+                await getCustomerTotalUnreadCount(
+                  recipient.contactId,
+                  fetch,
+                );
+
+              console.log(
+                `Customer push badge for ${recipient.email}:`,
+                totalUnreadCount,
+              );
+              
+
               return getMessaging()
                 .send({
 
@@ -2449,6 +2668,15 @@ if (
                     type:
                       'support_reply',
                   },
+                  ticketUnreadCount:
+                    String(
+                      newCustomerUnread,
+                    ),
+
+                  totalUnreadCount:
+                    String(
+                      totalUnreadCount,
+                    ),
 
 
                   /*
@@ -2479,6 +2707,9 @@ if (
 
                         sound:
                           'default',
+
+                        badge:
+                          totalUnreadCount,
                       },
                     },
                   },

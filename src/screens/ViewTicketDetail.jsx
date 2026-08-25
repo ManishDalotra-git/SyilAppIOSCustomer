@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import notifee from '@notifee/react-native';
 import {
   StyleSheet,
   Text,
@@ -79,6 +80,143 @@ const ViewTicketDetail = ({ navigation }) => {
     }, [])
   );
 
+
+  /* ================= MARK TICKET AS READ ================= */
+useFocusEffect(
+  useCallback(() => {
+
+    const markTicketAsRead = async () => {
+
+      try {
+
+        if (!ticketId) {
+          console.log(
+            'MARK READ: ticketId missing',
+          );
+          return;
+        }
+
+        /*
+         * Contact ID directly AsyncStorage se lo,
+         * taaki state update ka wait na karna pade.
+         */
+        const savedContactId =
+          await AsyncStorage.getItem(
+            'userID',
+          );
+
+        if (!savedContactId) {
+          console.log(
+            'MARK READ: contactId missing',
+          );
+          return;
+        }
+
+        console.log(
+          'MARK READ request:',
+          {
+            ticketId,
+            contactId:
+              savedContactId,
+          },
+        );
+
+
+        const response =
+          await fetch(
+            'https://syilappioscustomer.onrender.com/mark-customer-ticket-read',
+            {
+              method:
+                'POST',
+
+              headers: {
+                'Content-Type':
+                  'application/json',
+              },
+
+              body:
+                JSON.stringify({
+                  ticketId:
+                    String(
+                      ticketId,
+                    ),
+
+                  contactId:
+                    String(
+                      savedContactId,
+                    ),
+                }),
+            },
+          );
+
+
+        const data =
+          await response.json();
+
+
+        console.log(
+          'MARK READ response:',
+          data,
+        );
+
+
+        if (!response.ok) {
+
+          console.log(
+            'MARK READ failed:',
+            data,
+          );
+
+          return;
+        }
+
+
+        /*
+         * Backend remaining total unread
+         * return karega.
+         */
+        const totalUnreadCount =
+          Number(
+            data.totalUnreadCount ||
+            0,
+          );
+
+
+        console.log(
+          'Updated Customer app badge:',
+          totalUnreadCount,
+        );
+
+
+        /*
+         * iPhone app icon badge update.
+         */
+        await notifee.setBadgeCount(
+          totalUnreadCount,
+        );
+
+
+        console.log(
+          'Customer app badge updated successfully:',
+          totalUnreadCount,
+        );
+
+      } catch (error) {
+
+        console.log(
+          'MARK READ error:',
+          error,
+        );
+      }
+    };
+
+
+    markTicketAsRead();
+
+  }, [ticketId]),
+);
+
+
   /* ================= CONVERSATION ================= */
   useFocusEffect(
     useCallback(() => {
@@ -106,6 +244,9 @@ const ViewTicketDetail = ({ navigation }) => {
       fetchTicketConversation();
     }, [ticketId])
   );
+
+
+
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);

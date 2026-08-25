@@ -1085,7 +1085,7 @@ app.post('/get_tickets', async (req, res) => {
 
     const ticketPromises = ticketIds.map(ticketId =>
       fetch(
-        `https://api.hubapi.com/crm/v3/objects/tickets/${ticketId}?properties=subject,createdate,hubspot_owner_id,hs_pipeline_stage,customer_portal`,
+        `https://api.hubapi.com/crm/v3/objects/tickets/${ticketId}?properties=subject,createdate,hubspot_owner_id,hs_pipeline_stage,customer_portal,customer_unread_count`,
         {
           method: 'GET',
           headers: {
@@ -1105,6 +1105,7 @@ app.post('/get_tickets', async (req, res) => {
       ownerId: ticket.properties.hubspot_owner_id || '',
       status: ticket.properties.hs_pipeline_stage || '',
       customer_portal: ticket.properties.customer_portal || '',
+      customer_unread_count: Number(ticket.properties.customer_unread_count || 0),
     }));
 
     return res.status(200).json({
@@ -1870,6 +1871,165 @@ const getCustomerTotalUnreadCount =
       return 0;
     }
   };
+
+
+
+  app.post(
+  '/mark-customer-ticket-read',
+  async (req, res) => {
+
+    const {
+      ticketId,
+      contactId,
+    } = req.body;
+
+    console.log(
+      'Mark customer ticket read:',
+      {
+        ticketId,
+        contactId,
+      },
+    );
+
+
+    if (!ticketId || !contactId) {
+
+      return res.status(400).json({
+        success: false,
+        message:
+          'ticketId and contactId are required',
+      });
+    }
+
+
+    try {
+
+      const fetch =
+        (...args) =>
+          import(
+            'node-fetch'
+          ).then(
+            ({
+              default: fetch,
+            }) =>
+              fetch(...args),
+          );
+
+
+      /*
+       * ==========================================
+       * STEP 1
+       * Current ticket unread = 0
+       * ==========================================
+       */
+      const updateResponse =
+        await fetch(
+          `https://api.hubapi.com/crm/v3/objects/tickets/${ticketId}`,
+          {
+            method:
+              'PATCH',
+
+            headers: {
+              Authorization:
+                `Bearer ${HUBSPOT_API_KEY}`,
+
+              'Content-Type':
+                'application/json',
+            },
+
+            body:
+              JSON.stringify({
+                properties: {
+                  customer_unread_count:
+                    '0',
+                },
+              }),
+          },
+        );
+
+
+      const updateData =
+        await updateResponse.json();
+
+
+      if (!updateResponse.ok) {
+
+        console.error(
+          'Customer ticket mark read failed:',
+          updateData,
+        );
+
+        return res.status(500).json({
+          success: false,
+          message:
+            'Unable to mark ticket as read',
+        });
+      }
+
+
+      console.log(
+        `Customer ticket ${ticketId} unread reset to 0`,
+      );
+
+
+      /*
+       * ==========================================
+       * STEP 2
+       * Remaining total unread calculate
+       * ==========================================
+       */
+      const totalUnreadCount =
+        await getCustomerTotalUnreadCount(
+          String(contactId),
+          fetch,
+        );
+
+
+      console.log(
+        `Customer remaining total unread for ${contactId}:`,
+        totalUnreadCount,
+      );
+
+
+      /*
+       * ==========================================
+       * RESULT
+       * ==========================================
+       */
+      return res.status(200).json({
+
+        success:
+          true,
+
+        ticketId:
+          String(ticketId),
+
+        ticketUnreadCount:
+          0,
+
+        totalUnreadCount:
+          Number(
+            totalUnreadCount || 0,
+          ),
+      });
+
+
+    } catch (error) {
+
+      console.error(
+        'Mark customer ticket read error:',
+        error,
+      );
+
+
+      return res.status(500).json({
+        success: false,
+        message:
+          'Internal server error',
+      });
+    }
+  },
+);
 
 
 

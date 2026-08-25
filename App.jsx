@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, ImageBackground , TouchableOpacity, Image  } from 'react-native'
-import React from 'react'
+import React, { useEffect } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Home from './src/screens/Home';
 import Profile from './src/screens/Profile';
@@ -26,11 +26,40 @@ import WebViewScreen from './src/screens/WebViewScreen';
 
 import { NavigationContainer } from '@react-navigation/native';
 
+import {
+  navigationRef,
+  openPendingTicket,
+} from './src/navigation/navigationRef';
+
+import {
+  setupNotificationNavigation,
+} from './src/utils/fcm';
+
+
 const Stack = createNativeStackNavigator();
   
 const App = () => {
+
+  useEffect(() => {
+  const unsubscribe =
+    setupNotificationNavigation();
+
+  return () => {
+    if (typeof unsubscribe === 'function') {
+      unsubscribe();
+    }
+  };
+}, []);
+
   return (
-     <NavigationContainer>
+     <NavigationContainer ref={navigationRef}
+  onReady={() => {
+    console.log(
+      'Customer Navigation container ready',
+    );
+
+    openPendingTicket();
+  }} >
       <Stack.Navigator>
         <Stack.Screen name="Loading" component={Loading} options={{ headerShown: false }} />
         <Stack.Screen name="Home" component={Home} options={{ headerShown: false }} />

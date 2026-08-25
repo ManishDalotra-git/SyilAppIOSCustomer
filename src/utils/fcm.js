@@ -1,3 +1,8 @@
+import notifee, {
+  AndroidImportance,
+  EventType,
+} from '@notifee/react-native';
+
 import {
   Platform,
 } from 'react-native';
@@ -9,27 +14,42 @@ import {
 import {
   AuthorizationStatus,
   getAPNSToken,
+  getInitialNotification,
   getMessaging,
   getToken,
+  onMessage,
+  onNotificationOpenedApp,
   requestPermission,
 } from '@react-native-firebase/messaging';
 
-const firebaseApp = getApp();
+import {
+  openTicketFromNotification,
+} from '../navigation/navigationRef';
+
+
+const firebaseApp =
+  getApp();
 
 const messaging =
-  getMessaging(firebaseApp);
+  getMessaging(
+    firebaseApp,
+  );
 
 const API_URL =
   'https://syilappioscustomer.onrender.com';
 
 
 /*
- * Customer login ke baad:
+ * =====================================================
+ * Customer FCM Token Setup
+ * =====================================================
  *
- * 1. Notification permission lega
- * 2. APNs token check karega
- * 3. FCM token generate karega
- * 4. Customer backend par token save karega
+ * Login ke baad:
+ *
+ * 1. Notification permission
+ * 2. APNs token check
+ * 3. FCM token generate
+ * 4. Backend -> HubSpot me save
  */
 export const saveCustomerFCMToken =
   async email => {
@@ -37,6 +57,7 @@ export const saveCustomerFCMToken =
     try {
 
       if (!email) {
+
         console.log(
           'CUSTOMER FCM: Email missing',
         );
@@ -44,13 +65,15 @@ export const saveCustomerFCMToken =
         return null;
       }
 
+
       /*
-       * iOS notification permission.
+       * Notification permission.
        */
       const authStatus =
         await requestPermission(
           messaging,
         );
+
 
       const permissionGranted =
         authStatus ===
@@ -58,10 +81,12 @@ export const saveCustomerFCMToken =
         authStatus ===
           AuthorizationStatus.PROVISIONAL;
 
+
       console.log(
         'CUSTOMER FCM auth status:',
         authStatus,
       );
+
 
       if (!permissionGranted) {
 
@@ -74,14 +99,18 @@ export const saveCustomerFCMToken =
 
 
       /*
-       * iOS APNs token check.
+       * iOS APNs token.
        */
-      if (Platform.OS === 'ios') {
+      if (
+        Platform.OS ===
+        'ios'
+      ) {
 
         const apnsToken =
           await getAPNSToken(
             messaging,
           );
+
 
         console.log(
           'CUSTOMER APNs Token:',
@@ -100,6 +129,7 @@ export const saveCustomerFCMToken =
           messaging,
         );
 
+
       if (!fcmToken) {
 
         console.log(
@@ -109,6 +139,7 @@ export const saveCustomerFCMToken =
         return null;
       }
 
+
       console.log(
         'CUSTOMER FCM Token:',
         fcmToken,
@@ -116,10 +147,7 @@ export const saveCustomerFCMToken =
 
 
       /*
-       * Customer backend par save.
-       *
-       * Backend endpoint next step me
-       * create karenge.
+       * Backend par token save.
        */
       const response =
         await fetch(
@@ -152,7 +180,9 @@ export const saveCustomerFCMToken =
       const responseText =
         await response.text();
 
+
       let responseData = {};
+
 
       try {
 
@@ -189,6 +219,7 @@ export const saveCustomerFCMToken =
         responseData,
       );
 
+
       return fcmToken;
 
     } catch (error) {
@@ -198,6 +229,292 @@ export const saveCustomerFCMToken =
         error,
       );
 
+
       return null;
     }
+  };
+
+
+
+/*
+ * =====================================================
+ * Notification Navigation + Foreground Handling
+ * =====================================================
+ *
+ * Handles:
+ *
+ * 1. Foreground notification
+ * 2. Background notification tap
+ * 3. Quit-state notification tap
+ */
+export const setupNotificationNavigation =
+  () => {
+
+    console.log(
+      'CUSTOMER notification navigation setup',
+    );
+
+
+    /*
+     * =================================================
+     * CASE 1:
+     * App foreground me hai
+     * =================================================
+     */
+    const unsubscribeForeground =
+      onMessage(
+        messaging,
+
+        async remoteMessage => {
+
+          try {
+
+            console.log(
+              'CUSTOMER foreground notification:',
+              remoteMessage,
+            );
+
+
+            console.log(
+              'CUSTOMER foreground data:',
+              remoteMessage?.data,
+            );
+
+
+            const title =
+              remoteMessage
+                ?.notification
+                ?.title ||
+              'SYIL Support';
+
+
+            const body =
+              remoteMessage
+                ?.notification
+                ?.body ||
+              'You have a new ticket update.';
+
+
+            /*
+             * Foreground me local notification
+             * display karo.
+             */
+            await notifee
+              .displayNotification({
+                title,
+
+                body,
+
+                data:
+                  remoteMessage
+                    ?.data ||
+                  {},
+
+
+                /*
+                 * iOS
+                 */
+                ios: {
+                  sound:
+                    'default',
+                },
+
+
+                /*
+                 * Android future support.
+                 */
+                android: {
+                  channelId:
+                    'customer-ticket-updates',
+
+                  importance:
+                    AndroidImportance.HIGH,
+
+                  pressAction: {
+                    id:
+                      'default',
+                  },
+                },
+              });
+
+
+            console.log(
+              'CUSTOMER foreground notification displayed',
+            );
+
+          } catch (error) {
+
+            console.error(
+              'CUSTOMER foreground notification error:',
+              error,
+            );
+          }
+        },
+      );
+
+
+      const unsubscribeNotifeePress =
+  notifee.onForegroundEvent(
+    async ({
+      type,
+      detail,
+    }) => {
+
+      if (
+        type !== EventType.PRESS
+      ) {
+        return;
+      }
+
+      console.log(
+        'CUSTOMER Notifee notification pressed:',
+        detail?.notification?.data,
+      );
+
+      const data =
+        detail?.notification?.data ||
+        {};
+
+      openTicketFromNotification(
+        data,
+      );
+
+      const notificationId =
+        detail?.notification?.id;
+
+      if (notificationId) {
+        await notifee.cancelNotification(
+          notificationId,
+        );
+      }
+    },
+  );
+
+
+
+    /*
+     * =================================================
+     * CASE 2:
+     * App background me thi.
+     * User system notification par click karta hai.
+     * =================================================
+     */
+    const unsubscribeOpened =
+      onNotificationOpenedApp(
+        messaging,
+
+        remoteMessage => {
+
+          console.log(
+            'CUSTOMER notification opened from background:',
+            remoteMessage,
+          );
+
+
+          if (!remoteMessage) {
+            return;
+          }
+
+
+          console.log(
+            'CUSTOMER notification data:',
+            remoteMessage.data,
+          );
+
+
+          openTicketFromNotification(
+            remoteMessage.data ||
+              {},
+          );
+        },
+      );
+
+
+
+    /*
+     * =================================================
+     * CASE 3:
+     * App completely closed / killed thi.
+     *
+     * Notification click se app open hui.
+     * =================================================
+     */
+    getInitialNotification(
+      messaging,
+    )
+      .then(
+        remoteMessage => {
+
+          if (!remoteMessage) {
+
+            console.log(
+              'CUSTOMER app was not opened from notification',
+            );
+
+            return;
+          }
+
+
+          console.log(
+            'CUSTOMER app opened from quit-state notification:',
+            remoteMessage,
+          );
+
+
+          console.log(
+            'CUSTOMER initial notification data:',
+            remoteMessage.data,
+          );
+
+
+          openTicketFromNotification(
+            remoteMessage.data ||
+              {},
+          );
+        },
+      )
+      .catch(
+        error => {
+
+          console.error(
+            'CUSTOMER initial notification error:',
+            error,
+          );
+        },
+      );
+
+
+
+    /*
+     * =================================================
+     * Cleanup
+     * =================================================
+     *
+     * App.jsx useEffect cleanup ke waqt
+     * dono listeners remove honge.
+     */
+    return () => {
+
+  if (
+    typeof unsubscribeForeground ===
+    'function'
+  ) {
+    unsubscribeForeground();
+  }
+
+  if (
+    typeof unsubscribeNotifeePress ===
+    'function'
+  ) {
+    unsubscribeNotifeePress();
+  }
+
+  if (
+    typeof unsubscribeOpened ===
+    'function'
+  ) {
+    unsubscribeOpened();
+  }
+
+};
   };

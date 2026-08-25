@@ -1,4 +1,48 @@
 require('dotenv').config();
+
+
+const {
+  initializeApp,
+  cert,
+  getApps,
+} = require('firebase-admin/app');
+
+const {
+  getMessaging,
+} = require('firebase-admin/messaging');
+
+
+if (!process.env.FIREBASE_ADMIN_SDK) {
+  throw new Error(
+    'FIREBASE_ADMIN_SDK environment variable is missing',
+  );
+}
+
+
+const firebaseServiceAccount =
+  JSON.parse(
+    process.env.FIREBASE_ADMIN_SDK,
+  );
+
+
+if (getApps().length === 0) {
+
+  initializeApp({
+    credential:
+      cert(
+        firebaseServiceAccount,
+      ),
+  });
+
+}
+
+
+console.log(
+  'Customer Firebase Admin initialized',
+);
+
+
+
 const express = require('express');
 const bodyParser = require('body-parser');
 

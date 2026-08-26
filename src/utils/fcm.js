@@ -281,6 +281,33 @@ export const setupNotificationNavigation =
             );
 
 
+            const totalUnreadCount =
+              Number(
+                remoteMessage
+                  ?.data
+                  ?.totalUnreadCount ||
+                0,
+              );
+
+            console.log(
+              'CUSTOMER foreground total unread:',
+              totalUnreadCount,
+            );
+
+            /*
+            * App foreground me ho to
+            * app icon badge manually update.
+            */
+            await notifee.setBadgeCount(
+              totalUnreadCount,
+            );
+
+            console.log(
+              'CUSTOMER foreground app badge updated:',
+              totalUnreadCount,
+            );
+
+
             const title =
               remoteMessage
                 ?.notification

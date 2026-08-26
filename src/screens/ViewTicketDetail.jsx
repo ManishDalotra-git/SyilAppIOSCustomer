@@ -105,6 +105,23 @@ useFocusEffect(
             'userID',
           );
 
+
+        const supportTeamValue =
+          await AsyncStorage.getItem(
+            'app_support_team_member',
+          );
+
+        const isSupportTeamMember =
+          supportTeamValue === 'Yes';
+
+        console.log(
+          'MARK READ user role:',
+          isSupportTeamMember
+            ? 'support'
+            : 'customer',
+        );
+
+
         if (!savedContactId) {
           console.log(
             'MARK READ: contactId missing',
@@ -118,6 +135,11 @@ useFocusEffect(
             ticketId,
             contactId:
               savedContactId,
+
+            role:
+              isSupportTeamMember
+                ? 'support'
+                : 'customer',
           },
         );
 
@@ -135,17 +157,23 @@ useFocusEffect(
               },
 
               body:
-                JSON.stringify({
-                  ticketId:
-                    String(
-                      ticketId,
-                    ),
+              JSON.stringify({
 
-                  contactId:
-                    String(
-                      savedContactId,
-                    ),
-                }),
+                ticketId:
+                  String(
+                    ticketId,
+                  ),
+
+                contactId:
+                  String(
+                    savedContactId,
+                  ),
+
+                appSupportTeamMember:
+                  isSupportTeamMember
+                    ? 'Yes'
+                    : 'No',
+              }),
             },
           );
 

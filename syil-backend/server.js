@@ -2213,13 +2213,25 @@ const getCustomerSupportTotalUnreadCount =
     const {
       ticketId,
       contactId,
+      appSupportTeamMember,
     } = req.body;
+
+    const isSupportTeamMember =
+      String(
+        appSupportTeamMember || '',
+      )
+        .trim()
+        .toLowerCase() === 'yes';
 
     console.log(
       'Mark customer ticket read:',
       {
         ticketId,
         contactId,
+        role:
+          isSupportTeamMember
+            ? 'support'
+            : 'customer',
       },
     );
 
@@ -2272,8 +2284,13 @@ const getCustomerSupportTotalUnreadCount =
             body:
               JSON.stringify({
                 properties: {
-                  customer_unread_count:
-                    '0',
+                  ...(isSupportTeamMember
+                    ? {
+                        support_unread_count: '0',
+                      }
+                    : {
+                        customer_unread_count: '0',
+                      }),
                 },
               }),
           },
@@ -3454,6 +3471,21 @@ if (
  * Support ka OUTGOING message aane par
  * current ticket ka unread count +1.
  */
+
+
+      if (
+  latestMessage.direction !==
+  'OUTGOING'
+) {
+
+  console.log(
+    `Existing Customer push skipped for direction ${latestMessage.direction}`,
+  );
+
+  return;
+}
+
+
 
 const currentCustomerUnread =
   Number(

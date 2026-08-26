@@ -1122,95 +1122,1439 @@ app.post('/get_tickets', async (req, res) => {
 
 
 
-app.post('/get_owner_ticket', async (req, res) => {
-  const { ownerId } = req.body;
+app.post('/get-customer-my-tickets', async (req, res) => {
 
-  if (!ownerId) {
+  const { contactId } = req.body;
+
+  if (!contactId) {
     return res.status(400).json({
-      message: 'Owner ID is required',
+      message: 'Contact ID is required',
     });
   }
 
   try {
+
     const fetch = (...args) =>
-      import('node-fetch').then(({ default: fetch }) => fetch(...args));
-
-    let allTickets = [];
-    let after = null;
-
-    do {
-      const response = await fetch(
-        'https://api.hubapi.com/crm/v3/objects/tickets/search',
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${HUBSPOT_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            filterGroups: [
-              {
-                filters: [
-                  {
-                    propertyName: 'hubspot_owner_id',
-                    operator: 'EQ',
-                    value: ownerId,
-                  },
-                ],
-              },
-            ],
-            limit: 100,
-            after: after,
-            properties: [
-              'subject',
-              'content',
-              'hs_pipeline',
-              'hs_pipeline_stage',
-              'hubspot_owner_id',
-              'createdate',
-              'customer_portal',
-              'support_unread_count',
-            ],
-            sorts: ['createdate'],
-          }),
-        }
+      import('node-fetch').then(
+        ({ default: fetch }) => fetch(...args)
       );
 
-      const data = await response.json();
-      console.log('data---ticketowner ', data);
 
-      allTickets = [...allTickets, ...(data.results || [])];
+    console.log(
+      '========== GET CUSTOMER MY TICKETS =========='
+    );
 
-      after = data?.paging?.next?.after || null;
+    console.log(
+      'Contact ID:',
+      contactId
+    );
+
+
+    // =====================================================
+    // STEP 1
+    // CONTACT -> ALL TICKET IDS
+    // PAGINATION
+    // =====================================================
+
+    let allTicketIds = [];
+    let after = null;
+    let pageNumber = 1;
+
+
+    do {
+
+      let associationUrl =
+        `https://api.hubapi.com/crm/v3/objects/contacts/${contactId}/associations/tickets?limit=100`;
+
+
+      if (after) {
+
+        associationUrl +=
+          `&after=${encodeURIComponent(after)}`;
+
+      }
+
+
+      console.log(
+        `Fetching customer my-ticket association page ${pageNumber}`
+      );
+
+
+      const associationResponse =
+        await fetch(
+          associationUrl,
+          {
+            method: 'GET',
+
+            headers: {
+              Authorization:
+                `Bearer ${HUBSPOT_API_KEY}`,
+
+              'Content-Type':
+                'application/json',
+            },
+          }
+        );
+
+
+      const associationText =
+        await associationResponse.text();
+
+
+      let associationData = {};
+
+
+      try {
+
+        associationData =
+          associationText
+            ? JSON.parse(associationText)
+            : {};
+
+      } catch (error) {
+
+        console.error(
+          'Customer My Tickets association JSON error:',
+          associationText
+        );
+
+        return res.status(500).json({
+          message:
+            'Invalid HubSpot association response',
+        });
+
+      }
+
+
+      console.log(
+        `Customer My Tickets page ${pageNumber} status:`,
+        associationResponse.status
+      );
+
+
+      console.log(
+        `Customer My Tickets page ${pageNumber} count:`,
+        associationData.results?.length || 0
+      );
+
+
+      if (!associationResponse.ok) {
+
+        console.error(
+          'Customer My Tickets association failed:',
+          associationData
+        );
+
+
+        return res
+          .status(associationResponse.status)
+          .json({
+            message:
+              'Failed to fetch customer ticket associations',
+
+            detail:
+              associationData,
+          });
+
+      }
+
+
+      const pageIds =
+        (associationData.results || [])
+          .map(item => String(item.id))
+          .filter(Boolean);
+
+
+      allTicketIds.push(
+        ...pageIds
+      );
+
+
+      console.log(
+        'Customer My Ticket IDs collected:',
+        allTicketIds.length
+      );
+
+
+      after =
+        associationData
+          ?.paging
+          ?.next
+          ?.after ||
+        null;
+
+
+      pageNumber += 1;
+
 
     } while (after);
 
-    const tickets = allTickets.map(item => ({
-      ticketId: item.id,
-      subject: item.properties.subject || '',
-      createdDate: item.properties.createdate || '',
-      ownerId: item.properties.hubspot_owner_id || '',
-      status: item.properties.hs_pipeline_stage || '',
-      content: item.properties.content || '',
-      customer_portal: item.properties.customer_portal || '',
-      support_unread_count:
-        Number(
-          item.properties.support_unread_count || 0
-        ),
-    }));
+
+
+    // =====================================================
+    // REMOVE DUPLICATES
+    // =====================================================
+
+    const ticketIds = [
+      ...new Set(allTicketIds),
+    ];
+
+
+    console.log(
+      'FINAL UNIQUE CUSTOMER MY TICKET IDS:',
+      ticketIds.length
+    );
+
+
+    if (!ticketIds.length) {
+
+      return res.status(200).json({
+        message:
+          'No customer tickets found',
+
+        total: 0,
+
+        tickets: [],
+      });
+
+    }
+
+
+
+    // =====================================================
+    // STEP 2
+    // BATCH READ TICKET DETAILS
+    // =====================================================
+
+    const BATCH_SIZE = 100;
+
+    const chunks = [];
+
+
+    for (
+      let i = 0;
+      i < ticketIds.length;
+      i += BATCH_SIZE
+    ) {
+
+      chunks.push(
+        ticketIds.slice(
+          i,
+          i + BATCH_SIZE
+        )
+      );
+
+    }
+
+
+    let allTickets = [];
+
+
+    for (
+      let batchIndex = 0;
+      batchIndex < chunks.length;
+      batchIndex++
+    ) {
+
+      const chunk =
+        chunks[batchIndex];
+
+
+      console.log(
+        `Fetching Customer My Ticket batch ${batchIndex + 1}/${chunks.length}`
+      );
+
+
+      const batchResponse =
+        await fetch(
+          'https://api.hubapi.com/crm/v3/objects/tickets/batch/read',
+          {
+            method: 'POST',
+
+            headers: {
+              Authorization:
+                `Bearer ${HUBSPOT_API_KEY}`,
+
+              'Content-Type':
+                'application/json',
+            },
+
+            body:
+              JSON.stringify({
+
+                properties: [
+                  'subject',
+                  'createdate',
+                  'hubspot_owner_id',
+                  'hs_pipeline_stage',
+                  'customer_portal',
+                  'customer_unread_count',
+                ],
+
+                inputs:
+                  chunk.map(
+                    ticketId => ({
+                      id:
+                        String(ticketId),
+                    })
+                  ),
+
+              }),
+          }
+        );
+
+
+      const batchText =
+        await batchResponse.text();
+
+
+      let batchData = {};
+
+
+      try {
+
+        batchData =
+          batchText
+            ? JSON.parse(batchText)
+            : {};
+
+      } catch (error) {
+
+        console.error(
+          `Customer My Ticket batch ${batchIndex + 1} JSON error:`,
+          batchText
+        );
+
+        return res.status(500).json({
+          message:
+            `Invalid HubSpot response for batch ${batchIndex + 1}`,
+        });
+
+      }
+
+
+      if (!batchResponse.ok) {
+
+        console.error(
+          `Customer My Ticket batch ${batchIndex + 1} failed:`,
+          batchData
+        );
+
+
+        return res
+          .status(batchResponse.status)
+          .json({
+
+            message:
+              `Customer My Ticket batch ${batchIndex + 1} failed`,
+
+            detail:
+              batchData,
+          });
+
+      }
+
+
+      allTickets.push(
+        ...(batchData.results || [])
+      );
+
+
+      console.log(
+        'Customer My Ticket details collected:',
+        allTickets.length
+      );
+
+
+      if (
+        batchIndex <
+        chunks.length - 1
+      ) {
+
+        await new Promise(
+          resolve =>
+            setTimeout(resolve, 150)
+        );
+
+      }
+
+    }
+
+
+
+    // =====================================================
+    // FORMAT
+    // =====================================================
+
+    const formattedTickets =
+      allTickets
+        .filter(
+          ticket =>
+            ticket &&
+            ticket.properties
+        )
+        .map(ticket => ({
+
+          ticketId:
+            String(ticket.id),
+
+          subject:
+            ticket.properties
+              ?.subject || '',
+
+          createdDate:
+            ticket.properties
+              ?.createdate || '',
+
+          ownerId:
+            ticket.properties
+              ?.hubspot_owner_id || '',
+
+          status:
+            ticket.properties
+              ?.hs_pipeline_stage || '',
+
+          customer_portal:
+            ticket.properties
+              ?.customer_portal ?? '',
+
+          customer_unread_count:
+            Number(
+              ticket.properties
+                ?.customer_unread_count ||
+              0
+            ),
+
+        }));
+
+
+    console.log(
+      'FINAL CUSTOMER MY TICKETS:',
+      formattedTickets.length
+    );
+
 
     return res.status(200).json({
-      message: 'All owner tickets fetched',
-      total: tickets.length,
-      tickets,
+
+      message:
+        'Customer my tickets fetched successfully',
+
+      associatedTicketCount:
+        ticketIds.length,
+
+      total:
+        formattedTickets.length,
+
+      tickets:
+        formattedTickets,
+
     });
 
+
   } catch (error) {
-    console.error('Owner Ticket Fetch Error:', error);
+
+    console.error(
+      'GET CUSTOMER MY TICKETS ERROR:',
+      error
+    );
+
+
     return res.status(500).json({
-      message: 'Internal server error',
+
+      message:
+        'Internal server error',
+
+      error:
+        error?.message ||
+        'Unknown error',
+
     });
+
   }
+
+});
+
+
+
+
+app.post(
+  '/get-customer-organization-tickets',
+  async (req, res) => {
+
+    const { contactId } = req.body;
+
+
+    if (!contactId) {
+
+      return res.status(400).json({
+        message:
+          'Contact ID is required',
+      });
+
+    }
+
+
+    try {
+
+      const fetch = (...args) =>
+        import('node-fetch').then(
+          ({ default: fetch }) =>
+            fetch(...args)
+        );
+
+
+      console.log(
+        '========== GET CUSTOMER ORGANIZATION TICKETS =========='
+      );
+
+      console.log(
+        'Contact ID:',
+        contactId
+      );
+
+
+      // =====================================================
+      // STEP 1
+      // CONTACT -> COMPANY
+      // =====================================================
+
+      const contactResponse =
+        await fetch(
+          `https://api.hubapi.com/crm/v3/objects/contacts/${contactId}?associations=companies`,
+          {
+            method: 'GET',
+
+            headers: {
+              Authorization:
+                `Bearer ${HUBSPOT_API_KEY}`,
+
+              'Content-Type':
+                'application/json',
+            },
+          }
+        );
+
+
+      const contactData =
+        await contactResponse.json();
+
+
+      if (!contactResponse.ok) {
+
+        return res
+          .status(contactResponse.status)
+          .json({
+            message:
+              'Failed to fetch contact company',
+
+            detail:
+              contactData,
+          });
+
+      }
+
+
+      const companies =
+        contactData
+          ?.associations
+          ?.companies
+          ?.results ||
+        [];
+
+
+      if (!companies.length) {
+
+        return res.status(200).json({
+
+          message:
+            'No organization found',
+
+          total: 0,
+
+          tickets: [],
+
+        });
+
+      }
+
+
+      const companyId =
+        String(
+          companies[0].id
+        );
+
+
+      console.log(
+        'Customer Company ID:',
+        companyId
+      );
+
+
+
+      // =====================================================
+      // STEP 2
+      // COMPANY -> ALL TICKET IDS
+      // PAGINATION
+      // =====================================================
+
+      let allTicketIds = [];
+
+      let after = null;
+
+      let pageNumber = 1;
+
+
+      do {
+
+        let associationUrl =
+          `https://api.hubapi.com/crm/v3/objects/companies/${companyId}/associations/tickets?limit=100`;
+
+
+        if (after) {
+
+          associationUrl +=
+            `&after=${encodeURIComponent(after)}`;
+
+        }
+
+
+        console.log(
+          `Fetching Customer Organization association page ${pageNumber}`
+        );
+
+
+        const associationResponse =
+          await fetch(
+            associationUrl,
+            {
+              method: 'GET',
+
+              headers: {
+                Authorization:
+                  `Bearer ${HUBSPOT_API_KEY}`,
+
+                'Content-Type':
+                  'application/json',
+              },
+            }
+          );
+
+
+        const associationText =
+          await associationResponse.text();
+
+
+        let associationData = {};
+
+
+        try {
+
+          associationData =
+            associationText
+              ? JSON.parse(
+                  associationText
+                )
+              : {};
+
+        } catch (error) {
+
+          return res.status(500).json({
+
+            message:
+              'Invalid organization association response',
+
+          });
+
+        }
+
+
+        console.log(
+          `Customer Organization page ${pageNumber} count:`,
+          associationData.results?.length || 0
+        );
+
+
+        if (!associationResponse.ok) {
+
+          return res
+            .status(
+              associationResponse.status
+            )
+            .json({
+
+              message:
+                'Failed to fetch organization ticket associations',
+
+              detail:
+                associationData,
+
+            });
+
+        }
+
+
+        const pageIds =
+          (
+            associationData.results ||
+            []
+          )
+            .map(
+              item =>
+                String(item.id)
+            )
+            .filter(Boolean);
+
+
+        allTicketIds.push(
+          ...pageIds
+        );
+
+
+        after =
+          associationData
+            ?.paging
+            ?.next
+            ?.after ||
+          null;
+
+
+        pageNumber += 1;
+
+
+      } while (after);
+
+
+
+      // =====================================================
+      // REMOVE DUPLICATES
+      // =====================================================
+
+      const ticketIds = [
+        ...new Set(
+          allTicketIds
+        ),
+      ];
+
+
+      console.log(
+        'FINAL CUSTOMER ORGANIZATION TICKET IDS:',
+        ticketIds.length
+      );
+
+
+      if (!ticketIds.length) {
+
+        return res.status(200).json({
+
+          message:
+            'No organization tickets found',
+
+          total:
+            0,
+
+          tickets:
+            [],
+
+        });
+
+      }
+
+
+
+      // =====================================================
+      // STEP 3
+      // BATCH READ TICKETS
+      // =====================================================
+
+      const BATCH_SIZE =
+        100;
+
+
+      const chunks =
+        [];
+
+
+      for (
+        let i = 0;
+        i < ticketIds.length;
+        i += BATCH_SIZE
+      ) {
+
+        chunks.push(
+          ticketIds.slice(
+            i,
+            i + BATCH_SIZE
+          )
+        );
+
+      }
+
+
+      let allTickets =
+        [];
+
+
+      for (
+        let batchIndex = 0;
+        batchIndex < chunks.length;
+        batchIndex++
+      ) {
+
+        const chunk =
+          chunks[batchIndex];
+
+
+        console.log(
+          `Fetching Customer Organization batch ${batchIndex + 1}/${chunks.length}`
+        );
+
+
+        const batchResponse =
+          await fetch(
+            'https://api.hubapi.com/crm/v3/objects/tickets/batch/read',
+            {
+              method:
+                'POST',
+
+              headers: {
+                Authorization:
+                  `Bearer ${HUBSPOT_API_KEY}`,
+
+                'Content-Type':
+                  'application/json',
+              },
+
+              body:
+                JSON.stringify({
+
+                  properties: [
+                    'subject',
+                    'createdate',
+                    'hubspot_owner_id',
+                    'hs_pipeline_stage',
+                    'customer_portal',
+                    'customer_unread_count',
+                  ],
+
+                  inputs:
+                    chunk.map(
+                      ticketId => ({
+                        id:
+                          String(ticketId),
+                      })
+                    ),
+
+                }),
+            }
+          );
+
+
+        const batchText =
+          await batchResponse.text();
+
+
+        let batchData =
+          {};
+
+
+        try {
+
+          batchData =
+            batchText
+              ? JSON.parse(
+                  batchText
+                )
+              : {};
+
+        } catch (error) {
+
+          return res.status(500).json({
+
+            message:
+              `Invalid HubSpot organization batch ${batchIndex + 1}`,
+
+          });
+
+        }
+
+
+        if (!batchResponse.ok) {
+
+          console.error(
+            `Customer Organization batch ${batchIndex + 1} failed:`,
+            batchData
+          );
+
+
+          return res
+            .status(
+              batchResponse.status
+            )
+            .json({
+
+              message:
+                `Customer Organization batch ${batchIndex + 1} failed`,
+
+              detail:
+                batchData,
+
+            });
+
+        }
+
+
+        allTickets.push(
+          ...(
+            batchData.results ||
+            []
+          )
+        );
+
+
+        console.log(
+          'Customer Organization ticket details collected:',
+          allTickets.length
+        );
+
+
+        if (
+          batchIndex <
+          chunks.length - 1
+        ) {
+
+          await new Promise(
+            resolve =>
+              setTimeout(
+                resolve,
+                150
+              )
+          );
+
+        }
+
+      }
+
+
+
+      // =====================================================
+      // FORMAT
+      // =====================================================
+
+      const formattedTickets =
+        allTickets
+
+          .filter(
+            ticket =>
+              ticket &&
+              ticket.properties
+          )
+
+          .map(
+            ticket => ({
+
+              ticketId:
+                String(ticket.id),
+
+              subject:
+                ticket.properties
+                  ?.subject ||
+                '',
+
+              createdDate:
+                ticket.properties
+                  ?.createdate ||
+                '',
+
+              ownerId:
+                ticket.properties
+                  ?.hubspot_owner_id ||
+                '',
+
+              status:
+                ticket.properties
+                  ?.hs_pipeline_stage ||
+                '',
+
+              customer_portal:
+                ticket.properties
+                  ?.customer_portal ??
+                '',
+
+              customer_unread_count:
+                Number(
+                  ticket.properties
+                    ?.customer_unread_count ||
+                  0
+                ),
+
+            })
+          );
+
+
+      console.log(
+        'FINAL CUSTOMER ORGANIZATION TICKETS:',
+        formattedTickets.length
+      );
+
+
+      return res.status(200).json({
+
+        message:
+          'Customer organization tickets fetched successfully',
+
+        organizationId:
+          companyId,
+
+        associatedTicketCount:
+          ticketIds.length,
+
+        total:
+          formattedTickets.length,
+
+        tickets:
+          formattedTickets,
+
+      });
+
+
+    } catch (error) {
+
+      console.error(
+        'GET CUSTOMER ORGANIZATION TICKETS ERROR:',
+        error
+      );
+
+
+      return res.status(500).json({
+
+        message:
+          'Internal server error',
+
+        error:
+          error?.message ||
+          'Unknown error',
+
+      });
+
+    }
+
+  }
+);
+
+
+
+app.post('/get_owner_ticket', async (req, res) => {
+
+  const { ownerId } = req.body;
+
+
+  if (!ownerId) {
+
+    return res.status(400).json({
+
+      message:
+        'Owner ID is required',
+
+    });
+
+  }
+
+
+  try {
+
+    const fetch = (...args) =>
+      import('node-fetch').then(
+        ({ default: fetch }) =>
+          fetch(...args)
+      );
+
+
+    console.log(
+      '========== GET CUSTOMER OWNER TICKETS =========='
+    );
+
+
+    console.log(
+      'Owner ID:',
+      ownerId
+    );
+
+
+    let allTickets =
+      [];
+
+    let after =
+      null;
+
+    let pageNumber =
+      1;
+
+
+
+    // =====================================================
+    // FETCH ALL OWNER TICKETS
+    // WITH SEARCH PAGINATION
+    // =====================================================
+
+    do {
+
+      console.log(
+        `Fetching Customer Owner Ticket page ${pageNumber}`
+      );
+
+
+      const requestBody = {
+
+        filterGroups: [
+          {
+            filters: [
+              {
+                propertyName:
+                  'hubspot_owner_id',
+
+                operator:
+                  'EQ',
+
+                value:
+                  String(
+                    ownerId
+                  ),
+              },
+            ],
+          },
+        ],
+
+
+        properties: [
+          'subject',
+          'content',
+          'hs_pipeline',
+          'hs_pipeline_stage',
+          'hubspot_owner_id',
+          'createdate',
+          'customer_portal',
+          'support_unread_count',
+        ],
+
+
+        limit:
+          100,
+
+
+        sorts: [
+          {
+            propertyName:
+              'createdate',
+
+            direction:
+              'DESCENDING',
+          },
+        ],
+
+      };
+
+
+      /*
+       * First page par after mat bhejo.
+       */
+
+      if (after) {
+
+        requestBody.after =
+          after;
+
+      }
+
+
+      const response =
+        await fetch(
+
+          'https://api.hubapi.com/crm/v3/objects/tickets/search',
+
+          {
+            method:
+              'POST',
+
+            headers: {
+
+              Authorization:
+                `Bearer ${HUBSPOT_API_KEY}`,
+
+              'Content-Type':
+                'application/json',
+
+            },
+
+
+            body:
+              JSON.stringify(
+                requestBody
+              ),
+
+          }
+
+        );
+
+
+      const responseText =
+        await response.text();
+
+
+      let data = {};
+
+
+      try {
+
+        data =
+          responseText
+            ? JSON.parse(
+                responseText
+              )
+            : {};
+
+      } catch (error) {
+
+        console.error(
+          `Customer Owner Ticket page ${pageNumber} JSON error:`,
+          responseText
+        );
+
+
+        return res.status(500).json({
+
+          message:
+            `Invalid HubSpot response on Owner Ticket page ${pageNumber}`,
+
+        });
+
+      }
+
+
+      console.log(
+        `Customer Owner Ticket page ${pageNumber} HTTP status:`,
+        response.status
+      );
+
+
+      console.log(
+        `Customer Owner Ticket page ${pageNumber} count:`,
+        data.results?.length ||
+          0
+      );
+
+
+      if (!response.ok) {
+
+        console.error(
+          `Customer Owner Ticket page ${pageNumber} failed:`,
+          data
+        );
+
+
+        return res
+          .status(
+            response.status
+          )
+          .json({
+
+            message:
+              `Failed to fetch Owner Ticket page ${pageNumber}`,
+
+            detail:
+              data,
+
+          });
+
+      }
+
+
+      allTickets.push(
+        ...(
+          data.results ||
+          []
+        )
+      );
+
+
+      console.log(
+        'Total Customer Owner Tickets collected:',
+        allTickets.length
+      );
+
+
+      after =
+        data
+          ?.paging
+          ?.next
+          ?.after ||
+        null;
+
+
+      console.log(
+        'Next after:',
+        after
+      );
+
+
+      pageNumber +=
+        1;
+
+
+    } while (after);
+
+
+
+    // =====================================================
+    // REMOVE DUPLICATES
+    // =====================================================
+
+    const uniqueTickets =
+      Array.from(
+
+        new Map(
+
+          allTickets.map(
+            ticket => [
+
+              String(
+                ticket.id
+              ),
+
+              ticket,
+
+            ]
+          )
+
+        ).values()
+
+      );
+
+
+    console.log(
+      'Unique Customer Owner Tickets:',
+      uniqueTickets.length
+    );
+
+
+
+    // =====================================================
+    // FORMAT
+    // =====================================================
+
+    const tickets =
+      uniqueTickets.map(
+        item => ({
+
+          ticketId:
+            String(
+              item.id
+            ),
+
+          subject:
+            item.properties
+              ?.subject ||
+            '',
+
+          createdDate:
+            item.properties
+              ?.createdate ||
+            '',
+
+          ownerId:
+            item.properties
+              ?.hubspot_owner_id ||
+            '',
+
+          status:
+            item.properties
+              ?.hs_pipeline_stage ||
+            '',
+
+          content:
+            item.properties
+              ?.content ||
+            '',
+
+          customer_portal:
+            item.properties
+              ?.customer_portal ??
+            '',
+
+          support_unread_count:
+            Number(
+              item.properties
+                ?.support_unread_count ||
+              0
+            ),
+
+        })
+      );
+
+
+
+    console.log(
+      '===================================='
+    );
+
+
+    console.log(
+      'FINAL CUSTOMER OWNER TICKET COUNT:',
+      tickets.length
+    );
+
+
+    console.log(
+      '===================================='
+    );
+
+
+
+    return res.status(200).json({
+
+      message:
+        'All customer owner tickets fetched successfully',
+
+      ownerId:
+        String(
+          ownerId
+        ),
+
+      total:
+        tickets.length,
+
+      tickets:
+        tickets,
+
+    });
+
+
+  } catch (error) {
+
+    console.error(
+      'Customer Owner Ticket Fetch Error:',
+      {
+        message:
+          error?.message,
+
+        stack:
+          error?.stack,
+      }
+    );
+
+
+    return res.status(500).json({
+
+      message:
+        'Internal server error',
+
+      error:
+        error?.message ||
+        'Unknown error',
+
+    });
+
+  }
+
 });
 
 
@@ -1815,171 +3159,477 @@ app.post('/remove-customer-fcm-token', async (req, res) => {
 
 
 const getCustomerTotalUnreadCount =
-  async (contactId, fetch) => {
+  async (
+    contactId,
+    fetch,
+  ) => {
 
     try {
 
-      /*
-       * Contact ke saath associated tickets.
-       */
-      const associationResponse =
-        await fetch(
-          `https://api.hubapi.com/crm/v3/objects/contacts/${contactId}/associations/ticket`,
-          {
-            method: 'GET',
+      console.log(
+        '========== GET CUSTOMER TOTAL UNREAD COUNT =========='
+      );
 
-            headers: {
-              Authorization:
-                `Bearer ${HUBSPOT_API_KEY}`,
+      console.log(
+        'Contact ID:',
+        contactId
+      );
 
-              'Content-Type':
-                'application/json',
-            },
-          },
+
+      // =====================================================
+      // STEP 1
+      // CONTACT -> ALL ASSOCIATED TICKET IDS
+      // WITH PAGINATION
+      // =====================================================
+
+      let allTicketIds = [];
+
+      let after = null;
+
+      let pageNumber = 1;
+
+
+      do {
+
+        let associationUrl =
+          `https://api.hubapi.com/crm/v3/objects/contacts/${contactId}/associations/tickets?limit=100`;
+
+
+        if (after) {
+
+          associationUrl +=
+            `&after=${encodeURIComponent(after)}`;
+
+        }
+
+
+        console.log(
+          `Fetching Customer Unread association page ${pageNumber}`
         );
 
 
-      const associationData =
-        await associationResponse.json();
+        const associationResponse =
+          await fetch(
+            associationUrl,
+            {
+              method:
+                'GET',
 
+              headers: {
 
-      if (!associationResponse.ok) {
+                Authorization:
+                  `Bearer ${HUBSPOT_API_KEY}`,
 
-        console.error(
-          'Customer unread association error:',
-          associationData,
-        );
+                'Content-Type':
+                  'application/json',
 
-        return 0;
-      }
-
-
-      const ticketIds =
-        (
-          associationData.results ||
-          []
-        )
-          .map(
-            item =>
-              String(
-                item.id,
-              ),
-          )
-          .filter(
-            Boolean,
+              },
+            }
           );
 
 
-      if (!ticketIds.length) {
+        const associationText =
+          await associationResponse.text();
+
+
+        let associationData = {};
+
+
+        try {
+
+          associationData =
+            associationText
+              ? JSON.parse(
+                  associationText
+                )
+              : {};
+
+        } catch (error) {
+
+          console.error(
+            'Customer unread association JSON error:',
+            associationText
+          );
+
+
+          return 0;
+
+        }
+
+
+        console.log(
+          `Customer Unread association page ${pageNumber} HTTP status:`,
+          associationResponse.status
+        );
+
+
+        console.log(
+          `Customer Unread association page ${pageNumber} count:`,
+          associationData.results?.length ||
+            0
+        );
+
+
+        if (
+          !associationResponse.ok
+        ) {
+
+          console.error(
+            'Customer unread association failed:',
+            associationData
+          );
+
+
+          return 0;
+
+        }
+
+
+        const pageIds =
+          (
+            associationData.results ||
+            []
+          )
+            .map(
+              item =>
+                String(
+                  item.id
+                )
+            )
+            .filter(
+              Boolean
+            );
+
+
+        allTicketIds.push(
+          ...pageIds
+        );
+
+
+        console.log(
+          'Customer unread ticket IDs collected:',
+          allTicketIds.length
+        );
+
+
+        after =
+          associationData
+            ?.paging
+            ?.next
+            ?.after ||
+          null;
+
+
+        pageNumber +=
+          1;
+
+
+      } while (after);
+
+
+
+      // =====================================================
+      // REMOVE DUPLICATE IDS
+      // =====================================================
+
+      const ticketIds = [
+        ...new Set(
+          allTicketIds
+        ),
+      ];
+
+
+      console.log(
+        'FINAL CUSTOMER UNREAD UNIQUE TICKET IDS:',
+        ticketIds.length
+      );
+
+
+      if (
+        !ticketIds.length
+      ) {
+
         return 0;
+
       }
 
 
-      /*
-       * Har associated ticket ka
-       * customer_portal +
-       * customer_unread_count fetch.
-       */
-      const ticketRequests =
-        ticketIds.map(
-          async associatedTicketId => {
 
-            const response =
-              await fetch(
-                `https://api.hubapi.com/crm/v3/objects/tickets/${associatedTicketId}?properties=customer_portal,customer_unread_count`,
-                {
-                  method: 'GET',
+      // =====================================================
+      // STEP 2
+      // BATCH READ TICKET DETAILS
+      //
+      // Need only:
+      // customer_portal
+      // customer_unread_count
+      // =====================================================
 
-                  headers: {
-                    Authorization:
-                      `Bearer ${HUBSPOT_API_KEY}`,
-
-                    'Content-Type':
-                      'application/json',
-                  },
-                },
-              );
+      const BATCH_SIZE =
+        100;
 
 
-            const data =
-              await response.json();
+      const chunks =
+        [];
 
 
-            if (!response.ok) {
+      for (
+        let i = 0;
+        i < ticketIds.length;
+        i += BATCH_SIZE
+      ) {
 
-              console.error(
-                `Customer unread ticket ${associatedTicketId} fetch failed:`,
-                data,
-              );
-
-              return null;
-            }
-
-
-            return data;
-          },
-        );
-
-
-      const tickets =
-        (
-          await Promise.all(
-            ticketRequests,
+        chunks.push(
+          ticketIds.slice(
+            i,
+            i + BATCH_SIZE
           )
-        ).filter(
-          Boolean,
+        );
+
+      }
+
+
+      console.log(
+        'Customer unread total batches:',
+        chunks.length
+      );
+
+
+      let allTickets =
+        [];
+
+
+      for (
+        let batchIndex = 0;
+        batchIndex < chunks.length;
+        batchIndex++
+      ) {
+
+        const chunk =
+          chunks[
+            batchIndex
+          ];
+
+
+        console.log(
+          `Fetching Customer Unread batch ${batchIndex + 1}/${chunks.length}`
         );
 
 
-      /*
-       * Sirf Customer Portal tickets
-       * include karne hain.
-       */
+        const batchResponse =
+          await fetch(
+            'https://api.hubapi.com/crm/v3/objects/tickets/batch/read',
+            {
+              method:
+                'POST',
+
+              headers: {
+
+                Authorization:
+                  `Bearer ${HUBSPOT_API_KEY}`,
+
+                'Content-Type':
+                  'application/json',
+
+              },
+
+
+              body:
+                JSON.stringify({
+
+                  properties: [
+
+                    'customer_portal',
+
+                    'customer_unread_count',
+
+                  ],
+
+
+                  inputs:
+                    chunk.map(
+                      ticketId => ({
+
+                        id:
+                          String(
+                            ticketId
+                          ),
+
+                      })
+                    ),
+
+                }),
+
+            }
+          );
+
+
+        const batchText =
+          await batchResponse.text();
+
+
+        let batchData =
+          {};
+
+
+        try {
+
+          batchData =
+            batchText
+              ? JSON.parse(
+                  batchText
+                )
+              : {};
+
+        } catch (error) {
+
+          console.error(
+            `Customer unread batch ${batchIndex + 1} JSON error:`,
+            batchText
+          );
+
+
+          return 0;
+
+        }
+
+
+        console.log(
+          `Customer unread batch ${batchIndex + 1} HTTP status:`,
+          batchResponse.status
+        );
+
+
+        console.log(
+          `Customer unread batch ${batchIndex + 1} returned:`,
+          batchData.results?.length ||
+            0
+        );
+
+
+        if (
+          !batchResponse.ok
+        ) {
+
+          console.error(
+            `Customer unread batch ${batchIndex + 1} failed:`,
+            batchData
+          );
+
+
+          return 0;
+
+        }
+
+
+        allTickets.push(
+          ...(
+            batchData.results ||
+            []
+          )
+        );
+
+
+        console.log(
+          'Customer unread ticket details collected:',
+          allTickets.length
+        );
+
+
+        /*
+         * Small delay between batches
+         * to reduce HubSpot rate-limit pressure.
+         */
+
+        if (
+          batchIndex <
+          chunks.length - 1
+        ) {
+
+          await new Promise(
+            resolve =>
+              setTimeout(
+                resolve,
+                150
+              )
+          );
+
+        }
+
+      }
+
+
+
+      // =====================================================
+      // STEP 3
+      // CUSTOMER PORTAL TRUE ONLY
+      // =====================================================
+
       const customerTickets =
-        tickets.filter(
+        allTickets.filter(
           ticket => {
 
             const rawCustomerPortal =
-              ticket.properties
+              ticket
+                ?.properties
                 ?.customer_portal;
 
 
             const normalized =
               String(
-                rawCustomerPortal ?? '',
+                rawCustomerPortal ??
+                  ''
               )
                 .trim()
                 .toLowerCase();
 
 
             const isCustomerPortal =
-              rawCustomerPortal === true ||
-              normalized === 'true' ||
-              normalized === 'yes' ||
-              normalized === '1';
+              rawCustomerPortal ===
+                true ||
+
+              normalized ===
+                'true' ||
+
+              normalized ===
+                'yes' ||
+
+              normalized ===
+                '1';
 
 
-            return isCustomerPortal;
-          },
+            return (
+              isCustomerPortal
+            );
+
+          }
         );
 
 
-      /*
-       * Total unread.
-       */
+      console.log(
+        'Customer Portal TRUE tickets:',
+        customerTickets.length
+      );
+
+
+
+      // =====================================================
+      // STEP 4
+      // TOTAL CUSTOMER UNREAD COUNT
+      // =====================================================
+
       const totalUnreadCount =
         customerTickets.reduce(
           (
             total,
-            ticket,
+            ticket
           ) => {
 
             const count =
               Number(
                 ticket
-                  .properties
+                  ?.properties
                   ?.customer_unread_count ||
-                0,
+                  0
               );
 
 
@@ -1987,34 +3637,57 @@ const getCustomerTotalUnreadCount =
               total +
               (
                 Number.isFinite(
-                  count,
+                  count
                 )
                   ? count
                   : 0
               )
             );
+
           },
-          0,
+          0
         );
 
 
       console.log(
-        `Total Customer unread for contact ${contactId}:`,
-        totalUnreadCount,
+        '===================================='
       );
 
 
-      return totalUnreadCount;
+      console.log(
+        `TOTAL CUSTOMER UNREAD FOR CONTACT ${contactId}:`,
+        totalUnreadCount
+      );
+
+
+      console.log(
+        '===================================='
+      );
+
+
+      return (
+        totalUnreadCount
+      );
+
 
     } catch (error) {
 
       console.error(
         'getCustomerTotalUnreadCount error:',
-        error,
+        {
+          message:
+            error?.message,
+
+          stack:
+            error?.stack,
+        }
       );
 
+
       return 0;
+
     }
+
   };
 
 

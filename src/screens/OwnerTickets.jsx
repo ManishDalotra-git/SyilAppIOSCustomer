@@ -357,15 +357,59 @@ console.log('Final senderActorId:', senderActorId);
                   }
                 >
                   <View style={styles.tableRow}>
-                    <Text style={styles.cellID}>#{item.ticketId}</Text>
-                    <Text style={styles.cell}>{item.subject}</Text>
-                    <Text style={styles.cell}>
-                      {formatDate(item.createdDate)}
-                    </Text>
-                    <Text style={styles.cell}>
-                      {getStatusText(item.ownerId)}
-                    </Text>
-                  </View>
+
+  {/* Ticket ID + Support Unread Badge */}
+  <View style={styles.ticketIdCell}>
+
+    <Text
+      allowFontScaling={false}
+      style={styles.cellIDText}
+    >
+      #{item.ticketId}
+    </Text>
+
+    {Number(
+      item.support_unread_count || 0
+    ) > 0 && (
+
+      <View style={styles.unreadBadge}>
+        <Text
+          allowFontScaling={false}
+          style={styles.unreadBadgeText}
+        >
+          {item.support_unread_count}
+        </Text>
+      </View>
+
+    )}
+
+  </View>
+
+
+  <Text
+    allowFontScaling={false}
+    style={styles.cell}
+  >
+    {item.subject}
+  </Text>
+
+
+  <Text
+    allowFontScaling={false}
+    style={styles.cell}
+  >
+    {formatDate(item.createdDate)}
+  </Text>
+
+
+  <Text
+    allowFontScaling={false}
+    style={styles.cell}
+  >
+    {getStatusText(item.ownerId)}
+  </Text>
+
+</View>
                 </Pressable>
               )}
             />
@@ -406,4 +450,37 @@ const styles = StyleSheet.create({
     headerText: { fontWeight: '600', color: '#000', },
     closedStatus: { color: '#2e7d32', fontWeight: '600', },
     noTicketText: { textAlign: 'center', marginTop: 20, color: '#999', },
+
+
+    ticketIdCell: {
+  flex: '0 0 25%',
+  width: '25%',
+  flexDirection: 'row',
+  alignItems: 'center',
+  padding: 5,
+},
+
+cellIDText: {
+  fontSize: 12,
+  color: '#333',
+  fontWeight: '700',
+  flexShrink: 1,
+},
+
+unreadBadge: {
+  minWidth: 20,
+  height: 20,
+  borderRadius: 10,
+  backgroundColor: '#FFEA00',
+  alignItems: 'center',
+  justifyContent: 'center',
+  paddingHorizontal: 5,
+  marginLeft: 5,
+},
+
+unreadBadgeText: {
+  color: '#000',
+  fontSize: 11,
+  fontWeight: '700',
+},
 })

@@ -1169,6 +1169,7 @@ app.post('/get_owner_ticket', async (req, res) => {
               'hubspot_owner_id',
               'createdate',
               'customer_portal',
+              'support_unread_count',
             ],
             sorts: ['createdate'],
           }),
@@ -1192,6 +1193,10 @@ app.post('/get_owner_ticket', async (req, res) => {
       status: item.properties.hs_pipeline_stage || '',
       content: item.properties.content || '',
       customer_portal: item.properties.customer_portal || '',
+      support_unread_count:
+        Number(
+          item.properties.support_unread_count || 0
+        ),
     }));
 
     return res.status(200).json({
@@ -2327,17 +2332,166 @@ const getCustomerSupportTotalUnreadCount =
        * Remaining total unread calculate
        * ==========================================
        */
-      const totalUnreadCount =
-        await getCustomerTotalUnreadCount(
-          String(contactId),
-          fetch,
-        );
+      let totalUnreadCount = 0;
 
 
-      console.log(
-        `Customer remaining total unread for ${contactId}:`,
-        totalUnreadCount,
+/*
+ * ==========================================
+ * SUPPORT TEAM MEMBER
+ * ==========================================
+ */
+if (isSupportTeamMember) {
+
+  /*
+   * Contact ID se support member
+   * ka email get karo.
+   */
+  const supportContactResponse =
+    await fetch(
+      `https://api.hubapi.com/crm/v3/objects/contacts/${contactId}?properties=email`,
+      {
+        method: 'GET',
+
+        headers: {
+          Authorization:
+            `Bearer ${HUBSPOT_API_KEY}`,
+
+          'Content-Type':
+            'application/json',
+        },
+      },
+    );
+
+
+  const supportContactData =
+    await supportContactResponse.json();
+
+
+  const supportEmail =
+    String(
+      supportContactData
+        ?.properties
+        ?.email ||
+      '',
+    )
+      .trim()
+      .toLowerCase();
+
+
+  console.log(
+    'Support read reset email:',
+    supportEmail,
+  );
+
+
+  /*
+   * Email se HubSpot Owner ID find karo.
+   */
+  let supportOwnerId = '';
+
+
+  if (supportEmail) {
+
+    const ownersResponse =
+      await fetch(
+        'https://api.hubapi.com/crm/v3/owners?archived=false',
+        {
+          method: 'GET',
+
+          headers: {
+            Authorization:
+              `Bearer ${HUBSPOT_API_KEY}`,
+
+            'Content-Type':
+              'application/json',
+          },
+        },
       );
+
+
+    const ownersData =
+      await ownersResponse.json();
+
+
+    const matchedOwner =
+      (
+        ownersData.results || []
+      ).find(
+        owner =>
+          String(
+            owner.email || '',
+          )
+            .trim()
+            .toLowerCase() ===
+          supportEmail,
+      );
+
+
+    supportOwnerId =
+      String(
+        matchedOwner?.id ||
+        '',
+      );
+
+
+    console.log(
+      'Support read reset Owner ID:',
+      supportOwnerId ||
+      'Not found',
+    );
+  }
+
+
+  /*
+   * Support member ke remaining
+   * Customer Portal unread tickets.
+   */
+  if (supportOwnerId) {
+
+    totalUnreadCount =
+      await getCustomerSupportTotalUnreadCount(
+        supportOwnerId,
+        fetch,
+      );
+
+  } else {
+
+    console.log(
+      'Support Owner ID not found while calculating badge',
+    );
+
+    totalUnreadCount = 0;
+  }
+
+}
+
+
+/*
+ * ==========================================
+ * NORMAL CUSTOMER
+ * ==========================================
+ */
+else {
+
+  totalUnreadCount =
+    await getCustomerTotalUnreadCount(
+      String(contactId),
+      fetch,
+    );
+}
+
+
+console.log(
+  'Mark read total unread count:',
+  {
+    role:
+      isSupportTeamMember
+        ? 'support'
+        : 'customer',
+
+    totalUnreadCount,
+  },
+);
 
 
       /*

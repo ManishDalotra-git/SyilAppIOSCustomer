@@ -2014,6 +2014,198 @@ const getCustomerTotalUnreadCount =
 
 
 
+
+  /*
+ * =====================================================
+ * SUPPORT TEAM TOTAL UNREAD COUNT
+ * =====================================================
+ *
+ * Support member ke OWNED Customer Portal tickets ka
+ * total support_unread_count.
+ */
+const getCustomerSupportTotalUnreadCount =
+  async (
+    ownerId,
+    fetch,
+  ) => {
+
+    try {
+
+      let allTickets = [];
+      let after = null;
+
+
+      do {
+
+        const response =
+          await fetch(
+            'https://api.hubapi.com/crm/v3/objects/tickets/search',
+            {
+              method:
+                'POST',
+
+              headers: {
+                Authorization:
+                  `Bearer ${HUBSPOT_API_KEY}`,
+
+                'Content-Type':
+                  'application/json',
+              },
+
+              body:
+                JSON.stringify({
+                  filterGroups: [
+                    {
+                      filters: [
+                        {
+                          propertyName:
+                            'hubspot_owner_id',
+
+                          operator:
+                            'EQ',
+
+                          value:
+                            String(
+                              ownerId,
+                            ),
+                        },
+                      ],
+                    },
+                  ],
+
+                  properties: [
+                    'customer_portal',
+                    'support_unread_count',
+                  ],
+
+                  limit:
+                    100,
+
+                  ...(after
+                    ? {
+                        after,
+                      }
+                    : {}),
+                }),
+            },
+          );
+
+
+        const data =
+          await response.json();
+
+
+        if (!response.ok) {
+
+          console.error(
+            'Customer Support unread ticket search failed:',
+            data,
+          );
+
+          return 0;
+        }
+
+
+        allTickets = [
+          ...allTickets,
+          ...(data.results || []),
+        ];
+
+
+        after =
+          data?.paging
+            ?.next
+            ?.after ||
+          null;
+
+
+      } while (after);
+
+
+      /*
+       * Sirf Customer Portal tickets
+       * support badge me count honge.
+       */
+      const totalUnread =
+        allTickets.reduce(
+          (
+            total,
+            ticket,
+          ) => {
+
+            const rawPortal =
+              String(
+                ticket.properties
+                  ?.customer_portal ||
+                '',
+              )
+                .trim()
+                .toLowerCase();
+
+
+            const isCustomerPortal =
+              rawPortal === 'true' ||
+              rawPortal === 'yes' ||
+              rawPortal === '1';
+
+
+            /*
+             * Dealer helper se yahan difference:
+             *
+             * Customer app me hume
+             * customer_portal = TRUE tickets hi chahiye.
+             */
+            if (!isCustomerPortal) {
+              return total;
+            }
+
+
+            const unread =
+              Number(
+                ticket.properties
+                  ?.support_unread_count ||
+                0,
+              );
+
+
+            return (
+              total +
+              (
+                Number.isFinite(
+                  unread,
+                )
+                  ? unread
+                  : 0
+              )
+            );
+          },
+          0,
+        );
+
+
+      console.log(
+        `Customer Support Owner ${ownerId} total unread:`,
+        totalUnread,
+      );
+
+
+      return totalUnread;
+
+
+    } catch (error) {
+
+      console.error(
+        'getCustomerSupportTotalUnreadCount error:',
+        error,
+      );
+
+      return 0;
+    }
+  };
+
+
+
+
   app.post(
   '/mark-customer-ticket-read',
   async (req, res) => {
@@ -2369,12 +2561,12 @@ app.post(
        * nahi karna.
        */
       if (
-        latestMessage.direction !==
-        'OUTGOING'
+        latestMessage.direction !== 'OUTGOING' &&
+        latestMessage.direction !== 'INCOMING'
       ) {
 
         console.log(
-          `Customer push skipped: direction is ${latestMessage.direction}`,
+          `Webhook skipped: unsupported direction ${latestMessage.direction}`,
         );
 
         return;
@@ -2428,6 +2620,8 @@ app.post(
                   'customer_portal',
                   'hs_conversations_originating_thread_id',
                   'customer_unread_count',
+                  'support_unread_count',
+                  'hubspot_owner_id',
                 ],
 
                 limit:
@@ -2492,6 +2686,19 @@ app.post(
           ?.subject ||
         'Ticket Update';
 
+      const ticketOwnerId =
+        String(
+          matchedTicket
+            .properties
+            ?.hubspot_owner_id ||
+          '',
+        );
+
+      console.log(
+        'Customer Ticket Owner ID:',
+        ticketOwnerId || 'Not assigned',
+      );
+
 
       const rawCustomerPortal =
         matchedTicket
@@ -2554,6 +2761,688 @@ app.post(
 
         return;
       }
+
+
+
+      /*
+ * =====================================================
+ * INCOMING MESSAGE
+ * CUSTOMER -> SUPPORT TEAM MEMBER
+ * =====================================================
+ */
+if (
+  latestMessage.direction ===
+  'INCOMING'
+) {
+
+  console.log(
+    '========== CUSTOMER -> SUPPORT NOTIFICATION ==========',
+  );
+
+
+  /*
+   * =====================================================
+   * STEP 1
+   * Ticket Owner required.
+   * =====================================================
+   */
+  if (!ticketOwnerId) {
+
+    console.log(
+      'Support push skipped: Ticket owner ID missing',
+    );
+
+    return;
+  }
+
+
+  /*
+   * =====================================================
+   * STEP 2
+   * HubSpot Owner ID -> Owner Email
+   * =====================================================
+   */
+  let ticketOwnerEmail = '';
+
+  try {
+
+    const ownerResponse =
+      await fetch(
+        `https://api.hubapi.com/crm/v3/owners/${ticketOwnerId}`,
+        {
+          method: 'GET',
+
+          headers: {
+            Authorization:
+              `Bearer ${HUBSPOT_API_KEY}`,
+
+            'Content-Type':
+              'application/json',
+          },
+        },
+      );
+
+
+    const ownerData =
+      await ownerResponse.json();
+
+
+    if (!ownerResponse.ok) {
+
+      console.error(
+        'Customer Support owner fetch failed:',
+        ownerData,
+      );
+
+      return;
+    }
+
+
+    ticketOwnerEmail =
+      String(
+        ownerData.email ||
+        '',
+      )
+        .trim()
+        .toLowerCase();
+
+
+    console.log(
+      'Customer Support Ticket Owner Email:',
+      ticketOwnerEmail ||
+      'Not available',
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      'Customer Support owner fetch error:',
+      error,
+    );
+
+    return;
+  }
+
+
+  if (!ticketOwnerEmail) {
+
+    console.log(
+      'Support push skipped: Ticket owner email missing',
+    );
+
+    return;
+  }
+
+
+  /*
+   * =====================================================
+   * STEP 3
+   * Ticket Owner ka HubSpot Contact find.
+   *
+   * Required:
+   * app_support_team_member = Yes
+   * customer_fcm_token exists
+   * =====================================================
+   */
+  const ownerContactSearchResponse =
+    await fetch(
+      'https://api.hubapi.com/crm/v3/objects/contacts/search',
+      {
+        method: 'POST',
+
+        headers: {
+          Authorization:
+            `Bearer ${HUBSPOT_API_KEY}`,
+
+          'Content-Type':
+            'application/json',
+        },
+
+        body:
+          JSON.stringify({
+            filterGroups: [
+              {
+                filters: [
+                  {
+                    propertyName:
+                      'email',
+
+                    operator:
+                      'EQ',
+
+                    value:
+                      ticketOwnerEmail,
+                  },
+                ],
+              },
+            ],
+
+            properties: [
+              'email',
+              'firstname',
+              'lastname',
+              'app_support_team_member',
+              'customer_fcm_token',
+            ],
+
+            limit:
+              1,
+          }),
+      },
+    );
+
+
+  const ownerContactSearchData =
+    await ownerContactSearchResponse.json();
+
+
+  if (
+    !ownerContactSearchResponse.ok
+  ) {
+
+    console.error(
+      'Customer Support owner contact search failed:',
+      ownerContactSearchData,
+    );
+
+    return;
+  }
+
+
+  const ownerContact =
+    ownerContactSearchData
+      .results?.[0];
+
+
+  if (!ownerContact) {
+
+    console.log(
+      `Support push skipped: Contact not found for owner ${ticketOwnerEmail}`,
+    );
+
+    return;
+  }
+
+
+  /*
+   * =====================================================
+   * STEP 4
+   * Support member verification.
+   * =====================================================
+   */
+  const supportValue =
+    String(
+      ownerContact
+        .properties
+        ?.app_support_team_member ||
+      '',
+    )
+      .trim()
+      .toLowerCase();
+
+
+  const supportToken =
+    ownerContact
+      .properties
+      ?.customer_fcm_token;
+
+
+  console.log(
+    'Ticket Owner app_support_team_member:',
+    supportValue || 'empty',
+  );
+
+
+  console.log(
+    'Ticket Owner has customer FCM token:',
+    Boolean(
+      supportToken,
+    ),
+  );
+
+
+  if (
+    supportValue !==
+    'yes'
+  ) {
+
+    console.log(
+      `Support push skipped: Ticket owner ${ticketOwnerEmail} is not app support team member`,
+    );
+
+    return;
+  }
+
+
+  if (!supportToken) {
+
+    console.log(
+      `Support push skipped: Ticket owner ${ticketOwnerEmail} has no customer_fcm_token`,
+    );
+
+    return;
+  }
+
+
+  /*
+   * =====================================================
+   * STEP 5
+   * Current ticket support unread +1
+   * =====================================================
+   */
+  const currentSupportUnread =
+    Number(
+      matchedTicket
+        .properties
+        ?.support_unread_count ||
+      0,
+    );
+
+
+  const newSupportUnread =
+    currentSupportUnread + 1;
+
+
+  console.log(
+    `Customer Support Ticket ${ticketId} unread:`,
+    `${currentSupportUnread} -> ${newSupportUnread}`,
+  );
+
+
+  const supportUnreadUpdateResponse =
+    await fetch(
+      `https://api.hubapi.com/crm/v3/objects/tickets/${ticketId}`,
+      {
+        method:
+          'PATCH',
+
+        headers: {
+          Authorization:
+            `Bearer ${HUBSPOT_API_KEY}`,
+
+          'Content-Type':
+            'application/json',
+        },
+
+        body:
+          JSON.stringify({
+            properties: {
+              support_unread_count:
+                String(
+                  newSupportUnread,
+                ),
+            },
+          }),
+      },
+    );
+
+
+  const supportUnreadUpdateText =
+    await supportUnreadUpdateResponse.text();
+
+
+  if (
+    !supportUnreadUpdateResponse.ok
+  ) {
+
+    console.error(
+      'Customer Support unread update failed:',
+      supportUnreadUpdateText,
+    );
+
+    return;
+  }
+
+
+  console.log(
+    'Customer Support unread count updated successfully:',
+    newSupportUnread,
+  );
+
+
+  /*
+   * =====================================================
+   * STEP 6
+   * Customer sender name.
+   * =====================================================
+   */
+  const senderEmail =
+    latestMessage
+      .senders?.[0]
+      ?.deliveryIdentifier
+      ?.value
+      ?.trim()
+      ?.toLowerCase() ||
+    '';
+
+
+  let senderName =
+    latestMessage
+      .senders?.[0]
+      ?.name ||
+    senderEmail ||
+    'Customer';
+
+
+  /*
+   * Sender contact mile to proper
+   * First Name + Last Name use karo.
+   */
+  if (senderEmail) {
+
+    try {
+
+      const senderContactResponse =
+        await fetch(
+          'https://api.hubapi.com/crm/v3/objects/contacts/search',
+          {
+            method:
+              'POST',
+
+            headers: {
+              Authorization:
+                `Bearer ${HUBSPOT_API_KEY}`,
+
+              'Content-Type':
+                'application/json',
+            },
+
+            body:
+              JSON.stringify({
+                filterGroups: [
+                  {
+                    filters: [
+                      {
+                        propertyName:
+                          'email',
+
+                        operator:
+                          'EQ',
+
+                        value:
+                          senderEmail,
+                      },
+                    ],
+                  },
+                ],
+
+                properties: [
+                  'firstname',
+                  'lastname',
+                  'email',
+                ],
+
+                limit:
+                  1,
+              }),
+          },
+        );
+
+
+      const senderContactData =
+        await senderContactResponse.json();
+
+
+      const senderContact =
+        senderContactData
+          ?.results?.[0];
+
+
+      if (senderContact) {
+
+        const fullName = [
+          senderContact
+            .properties
+            ?.firstname,
+
+          senderContact
+            .properties
+            ?.lastname,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .trim();
+
+
+        if (fullName) {
+          senderName =
+            fullName;
+        }
+      }
+
+    } catch (error) {
+
+      console.log(
+        'Customer sender contact lookup error:',
+        error,
+      );
+    }
+  }
+
+
+  console.log(
+    'Customer message sender:',
+    {
+      email:
+        senderEmail,
+
+      name:
+        senderName,
+    },
+  );
+
+
+  /*
+   * =====================================================
+   * STEP 7
+   * Support member total unread badge.
+   * =====================================================
+   */
+  const totalSupportUnread =
+    await getCustomerSupportTotalUnreadCount(
+      ticketOwnerId,
+      fetch,
+    );
+
+
+  console.log(
+    `Customer Support push badge for ${ticketOwnerEmail}:`,
+    totalSupportUnread,
+  );
+
+
+  /*
+   * =====================================================
+   * STEP 8
+   * Push content.
+   * =====================================================
+   */
+  const supportNotificationTitle =
+    `New message from ${senderName}`;
+
+
+  const supportNotificationBody =
+    latestMessage
+      .text
+      ?.trim() ||
+    `You received a new customer reply on ${ticketSubject}.`;
+
+
+  /*
+   * =====================================================
+   * STEP 9
+   * Firebase push to SUPPORT MEMBER.
+   * =====================================================
+   */
+  try {
+
+    const pushResponse =
+      await getMessaging()
+        .send({
+
+          token:
+            supportToken,
+
+
+          notification: {
+
+            title:
+              supportNotificationTitle,
+
+            body:
+              supportNotificationBody
+                .slice(
+                  0,
+                  200,
+                ),
+          },
+
+
+          data: {
+
+            ticketId:
+              String(
+                ticketId,
+              ),
+
+            threadId:
+              String(
+                threadId,
+              ),
+
+            messageId:
+              String(
+                latestMessage.id,
+              ),
+
+            ticketSubject:
+              String(
+                ticketSubject,
+              ),
+
+            senderEmail:
+              String(
+                senderEmail,
+              ),
+
+            senderRole:
+              'customer',
+
+            direction:
+              'INCOMING',
+
+            targetScreen:
+              'ViewTicketDetail',
+
+            type:
+              'customer_message',
+
+            /*
+             * Specific ticket unread.
+             */
+            ticketUnreadCount:
+              String(
+                newSupportUnread,
+              ),
+
+            /*
+             * Support member total
+             * app icon unread.
+             */
+            totalUnreadCount:
+              String(
+                totalSupportUnread,
+              ),
+          },
+
+
+          apns: {
+
+            headers: {
+              'apns-priority':
+                '10',
+            },
+
+            payload: {
+
+              aps: {
+
+                alert: {
+
+                  title:
+                    supportNotificationTitle,
+
+                  body:
+                    supportNotificationBody
+                      .slice(
+                        0,
+                        200,
+                      ),
+                },
+
+                sound:
+                  'default',
+
+                badge:
+                  totalSupportUnread,
+              },
+            },
+          },
+        });
+
+
+    console.log(
+      'Customer Support Push success:',
+      pushResponse,
+    );
+
+
+    console.log(
+      '========== CUSTOMER SUPPORT PUSH SUMMARY ==========',
+    );
+
+    console.log(
+      'Support Recipient:',
+      ticketOwnerEmail,
+    );
+
+    console.log(
+      'Support Ticket Unread:',
+      newSupportUnread,
+    );
+
+    console.log(
+      'Support Total Unread:',
+      totalSupportUnread,
+    );
+
+
+  } catch (pushError) {
+
+    console.error(
+      'Customer Support Push failed:',
+      {
+        code:
+          pushError?.code,
+
+        message:
+          pushError?.message,
+      },
+    );
+  }
+
+
+  /*
+   * VERY IMPORTANT:
+   *
+   * INCOMING support flow complete.
+   * Neeche existing OUTGOING -> Customer
+   * code run nahi hona chahiye.
+   */
+  return;
+}
+
 
 
 

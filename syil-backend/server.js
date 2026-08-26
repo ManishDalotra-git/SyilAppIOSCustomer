@@ -1666,6 +1666,146 @@ app.post(
 );
 
 
+/*
+ * =====================================================
+ * CUSTOMER LOGOUT - REMOVE FCM TOKEN
+ * =====================================================
+ */
+app.post('/remove-customer-fcm-token', async (req, res) => {
+
+  const { contactId, fcmToken } = req.body;
+
+  console.log('CUSTOMER LOGOUT TOKEN REMOVE:', {
+    contactId,
+    hasToken: !!fcmToken,
+  });
+
+  if (!contactId) {
+    return res.status(400).json({
+      success: false,
+      message: 'Contact ID is required',
+    });
+  }
+
+  try {
+
+    const fetch = (...args) =>
+      import('node-fetch').then(
+        ({ default: fetch }) => fetch(...args)
+      );
+
+    /*
+     * Current contact read karo.
+     */
+    const contactResponse = await fetch(
+      `https://api.hubapi.com/crm/v3/objects/contacts/${contactId}?properties=customer_fcm_token`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${HUBSPOT_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    const contactData = await contactResponse.json();
+
+    if (!contactResponse.ok) {
+      console.error(
+        'Customer logout contact fetch failed:',
+        contactData
+      );
+
+      return res.status(500).json({
+        success: false,
+        message: 'Unable to fetch customer',
+      });
+    }
+
+    const savedToken =
+      contactData?.properties?.customer_fcm_token || '';
+
+    /*
+     * Safety:
+     * Agar app ne token bheja hai aur HubSpot me ab
+     * koi different/new token save hai, use clear nahi karna.
+     */
+    if (
+      fcmToken &&
+      savedToken &&
+      savedToken !== fcmToken
+    ) {
+      console.log(
+        'CUSTOMER LOGOUT: token changed already, skipping clear'
+      );
+
+      return res.status(200).json({
+        success: true,
+        cleared: false,
+        message: 'A newer token is already saved',
+      });
+    }
+
+    /*
+     * HubSpot token clear.
+     */
+    const updateResponse = await fetch(
+      `https://api.hubapi.com/crm/v3/objects/contacts/${contactId}`,
+      {
+        method: 'PATCH',
+
+        headers: {
+          Authorization: `Bearer ${HUBSPOT_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+
+        body: JSON.stringify({
+          properties: {
+            customer_fcm_token: '',
+          },
+        }),
+      }
+    );
+
+    const updateData = await updateResponse.json();
+
+    if (!updateResponse.ok) {
+      console.error(
+        'Customer FCM token remove failed:',
+        updateData
+      );
+
+      return res.status(500).json({
+        success: false,
+        message: 'Unable to remove customer FCM token',
+      });
+    }
+
+    console.log(
+      `Customer FCM token removed for contact ${contactId}`
+    );
+
+    return res.status(200).json({
+      success: true,
+      cleared: true,
+      message: 'Customer FCM token removed successfully',
+    });
+
+  } catch (error) {
+
+    console.error(
+      'Customer logout token remove error:',
+      error
+    );
+
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+    });
+  }
+});
+
+
 
 
 

@@ -17,6 +17,13 @@ import { getContactId, setContactId } from '../utils/hiddenFields';
 import { Picker } from '@react-native-picker/picker';
 import { Alert } from 'react-native';
 
+import notifee from '@notifee/react-native';
+import { getApp } from '@react-native-firebase/app';
+import {
+  getMessaging,
+  getToken,
+} from '@react-native-firebase/messaging';
+
 const Profile = ({ navigation }) => {
 
   StatusBar.setBarStyle('dark-content');
@@ -153,38 +160,288 @@ const Profile = ({ navigation }) => {
     }
   };
 
-  const handleLogout = () => {
+const handleLogout = () => {
+
   Alert.alert(
     'Logout',
     'Are you sure you want to logout?',
     [
-      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+
       {
         text: 'Logout',
+
         onPress: async () => {
-          await AsyncStorage.multiRemove([
-            'isLoggedIn',
-            'lastLoginTime',
-            'userEmail',
-            'userData',
-            'userID',
-            'userFirstName',
-            'userLastName',
-            'userBio',
-            'userPhone',
-            'userGender',
-          ]);
-          setContactId(null);
-          navigation.reset({
-            index: 0,
-            routes: [{ name: 'Login' }],
-          });
+
+          try {
+
+            setLoading(true);
+
+            /*
+             * ==========================================
+             * 1. CONTACT ID GET
+             * ==========================================
+             */
+            const contactId =
+              await AsyncStorage.getItem(
+                'userID',
+              );
+
+            console.log(
+              'CUSTOMER LOGOUT contactId:',
+              contactId,
+            );
+
+
+            /*
+             * ==========================================
+             * 2. CURRENT FCM TOKEN GET
+             * ==========================================
+             */
+            let currentFCMToken = null;
+
+            try {
+
+              const firebaseApp =
+                getApp();
+
+              const messaging =
+                getMessaging(
+                  firebaseApp,
+                );
+
+              currentFCMToken =
+                await getToken(
+                  messaging,
+                );
+
+              console.log(
+                'CUSTOMER LOGOUT FCM token:',
+                currentFCMToken
+                  ? 'available'
+                  : 'not available',
+              );
+
+            } catch (tokenError) {
+
+              console.log(
+                'CUSTOMER LOGOUT token get error:',
+                tokenError,
+              );
+            }
+
+
+            /*
+             * ==========================================
+             * 3. REMOVE TOKEN FROM HUBSPOT
+             * ==========================================
+             */
+            if (contactId) {
+
+              try {
+
+                const response =
+                  await fetch(
+                    'https://syilappioscustomer.onrender.com/remove-customer-fcm-token',
+                    {
+                      method: 'POST',
+
+                      headers: {
+                        'Content-Type':
+                          'application/json',
+                      },
+
+                      body:
+                        JSON.stringify({
+                          contactId:
+                            String(contactId),
+
+                          fcmToken:
+                            currentFCMToken ||
+                            '',
+                        }),
+                    },
+                  );
+
+
+                const responseText =
+                  await response.text();
+
+                let data = {};
+
+                try {
+                  data =
+                    responseText
+                      ? JSON.parse(
+                          responseText,
+                        )
+                      : {};
+                } catch {
+                  data = {
+                    message:
+                      responseText,
+                  };
+                }
+
+
+                console.log(
+                  'CUSTOMER LOGOUT backend response:',
+                  data,
+                );
+
+
+                if (!response.ok) {
+
+                  console.log(
+                    'CUSTOMER LOGOUT backend failed:',
+                    response.status,
+                    data,
+                  );
+                }
+
+              } catch (apiError) {
+
+                /*
+                 * Logout ko block nahi karenge
+                 * agar network unavailable ho.
+                 */
+                console.log(
+                  'CUSTOMER LOGOUT API error:',
+                  apiError,
+                );
+              }
+            }
+
+
+            /*
+             * ==========================================
+             * 4. APP ICON BADGE CLEAR
+             * ==========================================
+             */
+            try {
+
+              await notifee.setBadgeCount(
+                0,
+              );
+
+              console.log(
+                'CUSTOMER app badge cleared',
+              );
+
+            } catch (badgeError) {
+
+              console.log(
+                'CUSTOMER badge clear error:',
+                badgeError,
+              );
+            }
+
+
+            /*
+             * ==========================================
+             * 5. LOCAL LOGIN DATA CLEAR
+             * ==========================================
+             */
+            await AsyncStorage.multiRemove([
+              'isLoggedIn',
+              'lastLoginTime',
+              'userEmail',
+              'userData',
+              'userID',
+              'userFirstName',
+              'userLastName',
+              'userBio',
+              'userPhone',
+              'userGender',
+              'app_support_team_member',
+            ]);
+
+
+            /*
+             * hiddenFields contact ID clear
+             */
+            setContactId(null);
+
+
+            /*
+             * ==========================================
+             * 6. LOGIN SCREEN
+             * ==========================================
+             */
+            setLoading(false);
+
+            navigation.reset({
+              index: 0,
+              routes: [
+                {
+                  name: 'Login',
+                },
+              ],
+            });
+
+
+          } catch (error) {
+
+            console.error(
+              'CUSTOMER LOGOUT ERROR:',
+              error,
+            );
+
+            /*
+             * Even if unexpected error occurs,
+             * local logout complete karenge.
+             */
+            try {
+
+              await notifee.setBadgeCount(
+                0,
+              );
+
+              await AsyncStorage.multiRemove([
+                'isLoggedIn',
+                'lastLoginTime',
+                'userEmail',
+                'userData',
+                'userID',
+                'userFirstName',
+                'userLastName',
+                'userBio',
+                'userPhone',
+                'userGender',
+                'app_support_team_member',
+              ]);
+
+            } catch (
+              cleanupError
+            ) {
+
+              console.log(
+                'CUSTOMER logout cleanup error:',
+                cleanupError,
+              );
+            }
+
+
+            setContactId(null);
+            setLoading(false);
+
+            navigation.reset({
+              index: 0,
+              routes: [
+                {
+                  name: 'Login',
+                },
+              ],
+            });
+          }
         },
       },
-    ]
+    ],
   );
 };
-
 
   return (
     <View style={styles.container}>

@@ -16,15 +16,30 @@ import RenderHTML from 'react-native-render-html';
 import ImageViewing from 'react-native-image-viewing';
 import Video from 'react-native-video';
 import { HTMLElementModel, HTMLContentModel } from 'react-native-render-html';
+import { WebView } from 'react-native-webview';
 
 const KnowledgeDetail = ({ route, navigation }) => {
 
 
+  // const customHTMLElementModels = {
+  //   video: HTMLElementModel.fromCustomModel({
+  //     tagName: 'video',
+  //     contentModel: HTMLContentModel.block, // ⚠️ important
+  //   }),
+  // };
+
   const customHTMLElementModels = {
+
     video: HTMLElementModel.fromCustomModel({
       tagName: 'video',
       contentModel: HTMLContentModel.block,
     }),
+
+    iframe: HTMLElementModel.fromCustomModel({
+      tagName: 'iframe',
+      contentModel: HTMLContentModel.block,
+    }),
+
   };
 
 
@@ -59,13 +74,13 @@ const KnowledgeDetail = ({ route, navigation }) => {
           let cells = row.match(/<(td|th)[\s\S]*?<\/\1>/gi) || [];
           let finalCells = [];
 
-          
+          // Inject active rowspan cells first (empty cells)
           activeRowspans.forEach((r) => {
-            finalCells.push('<td></td>'); 
+            finalCells.push('<td></td>'); // empty cell
             r.count--;
           });
 
-          
+          // Remove expired rowspans
           for (let i = activeRowspans.length - 1; i >= 0; i--) {
             if (activeRowspans[i].count <= 0) activeRowspans.splice(i, 1);
           }
@@ -97,12 +112,14 @@ const KnowledgeDetail = ({ route, navigation }) => {
   useEffect(() => {
     let rawHtml = article?.['Article body'] || '';
 
+    // Apply rowspan normalization here
     rawHtml = normalizeRowspanHTML(rawHtml);
 
     rawHtml = rawHtml
       .replace(/<tr>\s*(<td>(&nbsp;|\s)*<\/td>\s*)+<\/tr>/gi, '')
       .replace(/<p>(&nbsp;|\s)*<\/p>/gi, '');
 
+    // Table wrapper for horizontal scroll
     rawHtml = rawHtml.replace(/<table/gi, '<div class="rn-table"><table');
     rawHtml = rawHtml.replace(/<\/table>/gi, '</table></div>');
 
@@ -178,11 +195,276 @@ const KnowledgeDetail = ({ route, navigation }) => {
   );
 };
 
-    const renderers = useMemo(
+
+const IframeRenderer = ({ tnode }) => {
+
+  let uri =
+    tnode?.attributes?.src || '';
+
+  if (!uri) {
+    return null;
+  }
+
+  uri = uri.replace(
+    /&amp;/g,
+    '&'
+  );
+
+
+  /*
+   * YouTube video ID
+   */
+
+  const match =
+    uri.match(
+      /youtube\.com\/embed\/([^?&/]+)/
+    );
+
+
+  if (!match) {
+
+    console.log(
+      'Unsupported iframe:',
+      uri
+    );
+
+    return null;
+
+  }
+
+
+  const videoId =
+    match[1];
+
+
+  console.log(
+    'YouTube Video ID:',
+    videoId
+  );
+
+
+  /*
+   * Original URL me start parameter ho
+   * to preserve karenge.
+   */
+
+  let start =
+    '';
+
+  try {
+
+    const startMatch =
+      uri.match(
+        /[?&]start=(\d+)/
+      );
+
+    if (startMatch) {
+
+      start =
+        `&start=${startMatch[1]}`;
+
+    }
+
+  } catch (error) {
+
+    console.log(
+      'Start parameter error:',
+      error
+    );
+
+  }
+
+
+  const embedUrl =
+    `https://www.youtube.com/embed/${videoId}?playsinline=1&rel=0${start}`;
+
+
+  /*
+   * Important:
+   * iframe ko proper HTTP page context
+   * provide kar rahe hain.
+   */
+
+  const youtubeHTML = `
+    <!DOCTYPE html>
+
+    <html>
+
+      <head>
+
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
+        />
+
+        <meta
+          name="referrer"
+          content="strict-origin-when-cross-origin"
+        />
+
+        <style>
+
+          html,
+          body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            overflow: hidden;
+          }
+
+          .video-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+          }
+
+          iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+          }
+
+        </style>
+
+      </head>
+
+
+      <body>
+
+        <div class="video-container">
+
+          <iframe
+
+            src="${embedUrl}"
+
+            title="YouTube video"
+
+            frameborder="0"
+
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+
+            referrerpolicy="strict-origin-when-cross-origin"
+
+            allowfullscreen
+
+          ></iframe>
+
+        </div>
+
+      </body>
+
+    </html>
+  `;
+
+
+  return (
+
+    <View
+      style={{
+        width: '100%',
+        height: 285,
+        marginVertical: 12,
+        borderRadius: 8,
+        overflow: 'hidden',
+        backgroundColor: '#000',
+      }}
+    >
+
+      <WebView
+
+        originWhitelist={[
+          '*'
+        ]}
+
+        source={{
+          html:
+            youtubeHTML,
+
+          /*
+           * VERY IMPORTANT:
+           * WebView ko https origin dena.
+           */
+          baseUrl:
+            'https://syil.com',
+        }}
+
+        style={{
+          flex: 1,
+          backgroundColor: '#000',
+        }}
+
+        javaScriptEnabled={
+          true
+        }
+
+        domStorageEnabled={
+          true
+        }
+
+        allowsInlineMediaPlayback={
+          true
+        }
+
+        mediaPlaybackRequiresUserAction={
+          true
+        }
+
+        allowsFullscreenVideo={
+          true
+        }
+
+        mixedContentMode="always"
+
+        setSupportMultipleWindows={
+          false
+        }
+
+        onError={event => {
+
+          console.log(
+            'YouTube WebView error:',
+            event.nativeEvent
+          );
+
+        }}
+
+        onHttpError={event => {
+
+          console.log(
+            'YouTube HTTP error:',
+            event.nativeEvent
+          );
+
+        }}
+
+      />
+
+    </View>
+
+  );
+
+};
+
+
+  const renderers = useMemo(
     () => ({
-      h3: H3Renderer,
-      img: ImageRenderer,
-      video: VideoRenderer, 
+
+      h3:
+        H3Renderer,
+
+      img:
+        ImageRenderer,
+
+      video:
+        VideoRenderer,
+
+      iframe:
+        IframeRenderer,
+
     }),
     []
   );
@@ -193,7 +475,7 @@ const KnowledgeDetail = ({ route, navigation }) => {
       div: {
         wrapperComponent: ({ tnode, children }) => {
           if (tnode.attributes.class === 'rn-table') {
-            
+            // ✅ Horizontal ScrollView for tables
             return (
               <ScrollView horizontal showsHorizontalScrollIndicator>
                 <View>{children}</View>
@@ -343,15 +625,49 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { padding: 16, paddingBottom: 80 },
   title: { fontSize: 24, fontWeight: '700', marginBottom: 10 },
-  metaContainer: { marginBottom: 16, paddingBottom: 12, borderBottomWidth: 1, borderColor: '#e0e0e0', },
-  title: { fontSize: 24, fontWeight: '700', marginBottom: 10, },
-  metaText: { fontSize: 14, color: '#555', },
-  metaValue: { fontWeight: '600', color: '#000', },
-  tocWrapper: { backgroundColor: '#ffe600', padding: 12, borderRadius: 8, marginBottom: 16, display:'none', },
-  tocTitle: { fontWeight: '700', marginBottom: 8, },
-  tocDropdown: { backgroundColor: '#fff', padding: 10, borderRadius: 6, flexDirection: 'row', justifyContent: 'space-between', },
-  tocPlaceholder: { color: '#555', },
-  tocItem: { paddingVertical: 8, },
+  metaContainer: {
+    marginBottom: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '700',
+    marginBottom: 10,
+  },
+  metaText: {
+    fontSize: 14,
+    color: '#555',
+  },
+  metaValue: {
+    fontWeight: '600',
+    color: '#000',
+  },
+  tocWrapper: {
+    backgroundColor: '#ffe600',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+    display:'none',
+  },
+  tocTitle: {
+    fontWeight: '700',
+    marginBottom: 8,
+  },
+  tocDropdown: {
+    backgroundColor: '#fff',
+    padding: 10,
+    borderRadius: 6,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  tocPlaceholder: {
+    color: '#555',
+  },
+  tocItem: {
+    paddingVertical: 8,
+  },
 });
 
 const htmlStyles = {

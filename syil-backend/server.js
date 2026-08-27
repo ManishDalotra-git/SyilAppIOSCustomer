@@ -2254,10 +2254,6 @@ app.post('/get_owner_ticket', async (req, res) => {
       };
 
 
-      /*
-       * First page par after mat bhejo.
-       */
-
       if (after) {
 
         requestBody.after =
@@ -3043,9 +3039,6 @@ app.post('/remove-customer-fcm-token', async (req, res) => {
         ({ default: fetch }) => fetch(...args)
       );
 
-    /*
-     * Current contact read karo.
-     */
     const contactResponse = await fetch(
       `https://api.hubapi.com/crm/v3/objects/contacts/${contactId}?properties=customer_fcm_token`,
       {
@@ -3074,11 +3067,7 @@ app.post('/remove-customer-fcm-token', async (req, res) => {
     const savedToken =
       contactData?.properties?.customer_fcm_token || '';
 
-    /*
-     * Safety:
-     * Agar app ne token bheja hai aur HubSpot me ab
-     * koi different/new token save hai, use clear nahi karna.
-     */
+ 
     if (
       fcmToken &&
       savedToken &&
@@ -3697,9 +3686,6 @@ const getCustomerTotalUnreadCount =
  * =====================================================
  * SUPPORT TEAM TOTAL UNREAD COUNT
  * =====================================================
- *
- * Support member ke OWNED Customer Portal tickets ka
- * total support_unread_count.
  */
 const getCustomerSupportTotalUnreadCount =
   async (
@@ -3800,10 +3786,6 @@ const getCustomerSupportTotalUnreadCount =
       } while (after);
 
 
-      /*
-       * Sirf Customer Portal tickets
-       * support badge me count honge.
-       */
       const totalUnread =
         allTickets.reduce(
           (
@@ -3827,12 +3809,7 @@ const getCustomerSupportTotalUnreadCount =
               rawPortal === '1';
 
 
-            /*
-             * Dealer helper se yahan difference:
-             *
-             * Customer app me hume
-             * customer_portal = TRUE tickets hi chahiye.
-             */
+          
             if (!isCustomerPortal) {
               return total;
             }
@@ -4016,8 +3993,7 @@ const getCustomerSupportTotalUnreadCount =
 if (isSupportTeamMember) {
 
   /*
-   * Contact ID se support member
-   * ka email get karo.
+   * Contact ID support member
    */
   const supportContactResponse =
     await fetch(
@@ -4057,9 +4033,7 @@ if (isSupportTeamMember) {
   );
 
 
-  /*
-   * Email se HubSpot Owner ID find karo.
-   */
+ 
   let supportOwnerId = '';
 
 
@@ -4115,10 +4089,6 @@ if (isSupportTeamMember) {
   }
 
 
-  /*
-   * Support member ke remaining
-   * Customer Portal unread tickets.
-   */
   if (supportOwnerId) {
 
     totalUnreadCount =
@@ -4213,10 +4183,7 @@ app.post(
   '/hubspot-webhook',
   async (req, res) => {
 
-    /*
-     * HubSpot ko immediately 200 dena important hai.
-     * Warna HubSpot webhook retry kar sakta hai.
-     */
+  
     res.sendStatus(200);
 
     try {
@@ -4251,9 +4218,7 @@ app.post(
       }
 
 
-      /*
-       * Abhi first event process.
-       */
+    
       const event =
         events[0];
 
@@ -4309,7 +4274,6 @@ app.post(
       /*
        * =====================================================
        * STEP 1
-       * Exact conversation message fetch karo.
        * =====================================================
        */
       const messagesResponse =

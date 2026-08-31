@@ -3786,6 +3786,10 @@ const getCustomerSupportTotalUnreadCount =
       } while (after);
 
 
+      /*
+       * Sirf Customer Portal tickets
+       * support badge me count honge.
+       */
       const totalUnread =
         allTickets.reduce(
           (
@@ -3809,7 +3813,12 @@ const getCustomerSupportTotalUnreadCount =
               rawPortal === '1';
 
 
-          
+            /*
+             * Dealer helper se yahan difference:
+             *
+             * Customer app me hume
+             * customer_portal = TRUE tickets hi chahiye.
+             */
             if (!isCustomerPortal) {
               return total;
             }
@@ -3993,7 +4002,8 @@ const getCustomerSupportTotalUnreadCount =
 if (isSupportTeamMember) {
 
   /*
-   * Contact ID support member
+   * Contact ID se support member
+   * ka email get karo.
    */
   const supportContactResponse =
     await fetch(
@@ -4033,7 +4043,9 @@ if (isSupportTeamMember) {
   );
 
 
- 
+  /*
+   * Email se HubSpot Owner ID find karo.
+   */
   let supportOwnerId = '';
 
 
@@ -4089,6 +4101,10 @@ if (isSupportTeamMember) {
   }
 
 
+  /*
+   * Support member ke remaining
+   * Customer Portal unread tickets.
+   */
   if (supportOwnerId) {
 
     totalUnreadCount =
@@ -4183,7 +4199,10 @@ app.post(
   '/hubspot-webhook',
   async (req, res) => {
 
-  
+    /*
+     * HubSpot ko immediately 200 dena important hai.
+     * Warna HubSpot webhook retry kar sakta hai.
+     */
     res.sendStatus(200);
 
     try {
@@ -4218,7 +4237,9 @@ app.post(
       }
 
 
-    
+      /*
+       * Abhi first event process.
+       */
       const event =
         events[0];
 
@@ -4274,6 +4295,7 @@ app.post(
       /*
        * =====================================================
        * STEP 1
+       * Exact conversation message fetch karo.
        * =====================================================
        */
       const messagesResponse =

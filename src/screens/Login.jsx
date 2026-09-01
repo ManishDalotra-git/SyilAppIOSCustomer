@@ -41,7 +41,7 @@ const handleSubmit = async () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                email: username,
+                email: username.trim().toLowerCase(),
                 password: password,
                 }),
             }
@@ -61,7 +61,7 @@ const handleSubmit = async () => {
       'lastLoginTime',
       Date.now().toString()
     );
-    await AsyncStorage.setItem('userEmail', username);
+    await AsyncStorage.setItem('userEmail', username.trim().toLowerCase() );
     setContactId(result.contactId);
     await AsyncStorage.setItem(
       'userData',
@@ -79,6 +79,7 @@ const handleSubmit = async () => {
     await AsyncStorage.setItem('userPhone', String(result.user?.phone ?? ''));
     await AsyncStorage.setItem('userGender', String(result.user?.gender ?? ''));
     await AsyncStorage.setItem('app_support_team_member', String(result.user?.app_support_team_member ?? ''));
+    await AsyncStorage.setItem('mobile_app_permission', String(result.user?.mobile_app_permission ?? ''));
 
     console.log('result.user----- ', result.user);
     

@@ -24,6 +24,7 @@
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = syilReact/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = syilReact/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		C283A64C303DB18A00A1851E /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		C283A64E3045A7EA00A1851E /* syilReactRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = syilReactRelease.entitlements; path = syilReact/syilReactRelease.entitlements; sourceTree = "<group>"; };
 		C2C9F9382FDAC7E400BAD15B /* syilReact copy2-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "syilReact copy2-Info.plist"; path = "/Users/rentelplaza/SYIL_IOS_24.4_cusromer_portal/SyilAppIOS/ios/syilReact copy2-Info.plist"; sourceTree = "<absolute>"; };
 		C2C9F94A2FDACA1E00BAD15B /* syilReact copy copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "syilReact copy copy-Info.plist"; path = "/Users/rentelplaza/SYIL_IOS_24.4_cusromer_portal/SyilAppIOS/ios/syilReact copy copy-Info.plist"; sourceTree = "<absolute>"; };
 		C2F2A9E130359AAA005D3376 /* syilReactDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = syilReactDebug.entitlements; path = syilReact/syilReactDebug.entitlements; sourceTree = "<group>"; };
@@ -47,6 +48,7 @@
 		13B07FAE1A68108700A75B9A /* syilReact */ = {
 			isa = PBXGroup;
 			children = (
+				C283A64E3045A7EA00A1851E /* syilReactRelease.entitlements */,
 				C283A64C303DB18A00A1851E /* GoogleService-Info.plist */,
 				C2F2A9E130359AAA005D3376 /* syilReactDebug.entitlements */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
@@ -297,7 +299,7 @@
 				CODE_SIGN_ENTITLEMENTS = syilReact/syilReactDebug.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 7;
+				CURRENT_PROJECT_VERSION = 8;
 				DEVELOPMENT_TEAM = GU97M8A459;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = syilReact/Info.plist;
@@ -336,7 +338,8 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = 7;
+				CODE_SIGN_ENTITLEMENTS = syilReact/syilReactRelease.entitlements;
+				CURRENT_PROJECT_VERSION = 8;
 				DEVELOPMENT_TEAM = GU97M8A459;
 				INFOPLIST_FILE = syilReact/Info.plist;
 				INFOPLIST_KEY_NSCameraUsageDescription = "App needs access to your camera to take photos.";

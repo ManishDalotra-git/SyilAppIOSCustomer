@@ -618,88 +618,346 @@ app.post('/get-user-data', async (req, res) => {
 
 
 app.post('/check_login_detail', async (req, res) => {
-  const { email, password } = req.body;
-  console.log('email---- ' , email);
-  console.log(HUBSPOT_API_KEY);
-  if (!email || !password) {
+
+  const {
+    email,
+    password,
+  } = req.body;
+
+
+  const normalizedEmail =
+    String(email || '')
+      .trim()
+      .toLowerCase();
+
+
+  console.log(
+    '========== CUSTOMER APP LOGIN =========='
+  );
+
+  console.log(
+    'Customer login email:',
+    normalizedEmail
+  );
+
+
+  // =====================================================
+  // VALIDATION
+  // =====================================================
+
+  if (
+    !normalizedEmail ||
+    !password
+  ) {
+
     return res.status(400).json({
-      message: 'Email and password are required',
+      success: false,
+      message:
+        'Email and password are required',
     });
+
   }
 
-  try {
-    const fetch = (...args) =>
-      import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
-    // SEARCH CONTACT BY EMAIL
-    const searchResponse = await fetch(
-      'https://api.hubapi.com/crm/v3/objects/contacts/search',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${HUBSPOT_API_KEY}`,
-        },
-        body: JSON.stringify({
-          filterGroups: [
-            {
-              filters: [
+  try {
+
+    const fetch =
+      (...args) =>
+        import('node-fetch').then(
+          ({ default: fetch }) =>
+            fetch(...args)
+        );
+
+
+    // =====================================================
+    // STEP 1
+    // SEARCH HUBSPOT CONTACT
+    // =====================================================
+
+    const searchResponse =
+      await fetch(
+        'https://api.hubapi.com/crm/v3/objects/contacts/search',
+        {
+          method:
+            'POST',
+
+          headers: {
+            'Content-Type':
+              'application/json',
+
+            Authorization:
+              `Bearer ${HUBSPOT_API_KEY}`,
+          },
+
+          body:
+            JSON.stringify({
+
+              filterGroups: [
                 {
-                  propertyName: 'email',
-                  operator: 'EQ',
-                  value: email,
+                  filters: [
+                    {
+                      propertyName:
+                        'email',
+
+                      operator:
+                        'EQ',
+
+                      value:
+                        normalizedEmail,
+                    },
+                  ],
                 },
               ],
-            },
-          ],
-          properties: ['email', 'mobile_password', 'firstname', 'lastname', 'profile_image', 'bio', 'phone', 'gender', 'app_support_team_member'],
-        }),
-      }
+
+
+              properties: [
+
+                'email',
+
+                'mobile_password',
+
+                'firstname',
+
+                'lastname',
+
+                'profile_image',
+
+                'bio',
+
+                'phone',
+
+                'gender',
+
+                'app_support_team_member',
+
+                // IMPORTANT
+                'mobile_app_permission',
+
+              ],
+
+
+              limit:
+                1,
+
+            }),
+        }
+      );
+
+
+    const searchData =
+      await searchResponse.json();
+
+
+    // =====================================================
+    // HUBSPOT ERROR
+    // =====================================================
+
+    if (
+      !searchResponse.ok
+    ) {
+
+      console.error(
+        'Customer login HubSpot search failed:',
+        searchData
+      );
+
+
+      return res.status(500).json({
+        success: false,
+
+        message:
+          'Unable to verify your account. Please try again.',
+      });
+
+    }
+
+
+
+    // =====================================================
+    // CONTACT NOT FOUND
+    // =====================================================
+
+    if (
+      !searchData.results ||
+      searchData.results.length === 0
+    ) {
+
+      console.log(
+        'Customer login failed: contact not found'
+      );
+
+
+      return res.status(401).json({
+        success: false,
+
+        message:
+          'Invalid email or password.',
+      });
+
+    }
+
+
+
+    const contact =
+      searchData.results[0];
+
+
+    const contactId =
+      String(
+        contact.id
+      );
+
+
+    const properties =
+      contact.properties || {};
+
+
+    const hubspotPassword =
+      properties.mobile_password || '';
+
+
+
+    // =====================================================
+    // STEP 2
+    // PASSWORD CHECK
+    // =====================================================
+
+    if (
+      !hubspotPassword
+    ) {
+
+      console.log(
+        'Customer login failed: password not configured'
+      );
+
+
+      return res.status(401).json({
+        success: false,
+
+        message:
+          'Password is not set for this account.',
+      });
+
+    }
+
+
+
+    if (
+      hubspotPassword !== password
+    ) {
+
+      console.log(
+        'Customer login failed: invalid password'
+      );
+
+
+      return res.status(401).json({
+        success: false,
+
+        message:
+          'Please enter a valid email and password.',
+      });
+
+    }
+
+
+
+    // =====================================================
+    // STEP 3
+    // MOBILE APP PERMISSION CHECK
+    // =====================================================
+
+    /*
+     * HubSpot property:
+     *
+     * mobile_app_permission
+     *
+     * Expected options:
+     *
+     * Dealer App
+     * Customer App
+     */
+
+
+    const rawMobileAppPermission =
+      properties.mobile_app_permission || '';
+
+
+    const mobileAppPermission =
+      String(
+        rawMobileAppPermission
+      )
+        .trim()
+        .toLowerCase();
+
+
+    console.log(
+      'Customer mobile_app_permission:',
+      rawMobileAppPermission || 'EMPTY'
     );
 
-    const searchData = await searchResponse.json();
+    const hasCustomerAppPermission =
+      mobileAppPermission === 'customer app' ||
+      mobileAppPermission === 'customer_app';
 
-    if (!searchData.results || searchData.results.length === 0) {
-      return res.status(401).json({
-        message: 'Invalid email, please enter your valid email',
+    // =====================================================
+    // EMPTY PERMISSION
+    // =====================================================
+
+    if (
+      !mobileAppPermission
+    ) {
+      console.log( `Customer login blocked: mobile_app_permission empty for contact ${contactId}` );
+
+      return res.status(403).json({
+        success: false,
+        code: 'MOBILE_APP_PERMISSION_MISSING',
+        message: 'You do not have permission to access the Customer App. Please contact SYIL Support.',
       });
     }
 
-    const contact = searchData.results[0];
-    const contactId = contact.id;
-    const hubspotPassword = contact.properties.mobile_password;
+    // =====================================================
+    // WRONG APP PERMISSION
+    // =====================================================
 
-    if (!hubspotPassword) {
-      return res.status(401).json({
-        message: 'Password not set for this account',
+    if (
+      !hasCustomerAppPermission
+    ) {
+      console.log( `Customer login blocked: wrong app permission "${rawMobileAppPermission}" for contact ${contactId}` );
+      return res.status(403).json({
+        success: false,
+        code: 'WRONG_MOBILE_APP',
+        message: 'These login details are not authorized for the Customer App. Please use the SYIL Dealer App or enter a valid Customer App account.',
       });
     }
 
-    if (hubspotPassword !== password) {
-      return res.status(401).json({
-        message: 'Please enter a valid password',
-      });
-    }
-
+    // =====================================================
+    // STEP 4
     // LOGIN SUCCESS
+    // =====================================================
+
+    console.log( `Customer App login authorized for contact ${contactId}` );
     return res.status(200).json({
+      success: true,
       message: 'Login successful',
       contactId: contactId,
       user: {
-        email: contact.properties.email,
-        firstName: contact.properties.firstname || '',
-        lastName: contact.properties.lastname || '',
-        profileImage: contact.properties.hs_avatar_url || '',
-        bio: contact.properties.bio || '',
-        phone: contact.properties.phone || '',
-        gender: contact.properties.gender || '',
-        app_support_team_member: contact.properties.app_support_team_member || '',
+        email: properties.email || '',
+        firstName: properties.firstname || '',
+        lastName: properties.lastname || '',
+        profileImage: properties.profile_image || '',
+        bio: properties.bio || '',
+        phone: properties.phone || '',
+        gender: properties.gender || '',
+        app_support_team_member: properties.app_support_team_member || '',
+        mobile_app_permission: rawMobileAppPermission,
       },
     });
 
   } catch (error) {
-    console.error('Login Error:', error);
+    console.error( 'Customer Login Error:', error );
     return res.status(500).json({
+      success: false,
       message: 'Internal server error',
     });
   }
